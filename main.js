@@ -1,32 +1,28 @@
 const ccxt = require ('ccxt');
-var W3CWebSocket = require('websocket').w3cwebsocket;
+const W3CWebSocket = require('websocket').w3cwebsocket;
 
+function exchange_wss (wss='wss://', send="", callback=null) {
 
-var client = new W3CWebSocket('wss://stream.bybit.com/realtime');
+    const client = new W3CWebSocket(wss);
 
-client.onerror = function() {
-    console.log('Connection Error');
-};
+    client.onerror = function() { throw 'Connection Error'; };
+    client.onclose = function() { throw 'Client Closed'; };
+    client.onopen = function() { client.send(send); };
+    client.onmessage = function(e) { callback(e.data); };
 
-client.onopen = function() {
-    console.log('WebSocket Client Connected');
-    client.send(JSON.stringify(
-        {
-            op: "subscribe",
-            args: [
-                'kline.BTCUSD.1m'
-            ]
-        }
-    ));
-};
+}
 
-client.onclose = function() {
-    console.log('echo-protocol Client Closed');
-};
+// exchange_wss('wss://stream.bybit.com/realtime', JSON.stringify({
+//     op: "subscribe",
+//     args: [
+//         'kline.BTCUSD.1m'
+//     ]
+// }), function (e=null) {
+//     console.log(e)
+// })
 
-client.onmessage = function(e) {
-    let message = JSON.parse(e.data);
-    try {
-        console.log(message.data.close)
-    } catch (e) {}
-};
+exchange_wss('wss://www.deribit.com/ws/api/v1/', JSON.stringify({
+    "action": "/api/v1/public/index"
+}), function (e=null) {
+    console.log(e)
+})
