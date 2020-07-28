@@ -1,0 +1,22 @@
+{
+  "name": "arbitration",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eps-game/arbitration.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eps-game/arbitration/issues"
+  },
+  "homepage": "https://github.com/eps-game/arbitration#readme"
+}
