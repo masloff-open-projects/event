@@ -5,6 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "async": "^3.2.0",
+    "bybit": "^1.0.5",
     "ccxt": "^1.32.12",
     "cipher-base": {
       "integrity": "sha512-Kkht5ye6ZGmwv40uUDZztayT2ThLQGfnj/T71N/XzeZeo3nf8foyW7zGTsPYkEya3m5f3cAypH+qe7YOrM1U2Q==",
@@ -173,6 +174,7 @@
       "resolved": "https://registry.npmjs.org/q/-/q-1.5.1.tgz",
       "version": "1.5.1"
     },
+    "qs": "^6.9.4",
     "readable-stream": {
       "integrity": "sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==",
       "requires": {
