@@ -1,12 +1,9 @@
 const ccxt = require ('ccxt');
 const W3CWebSocket = require('websocket').w3cwebsocket;
-
-/**
- * Глобальная ячейка данных.
- * С ней общаются методы обновления цены, установки ордеров
- *
- * @type {{price: {deribit: {btc: number}, bybit: {btc: number}}, orders: {deribit: {type: string, open: boolean}, bybit: {type: string, open: boolean}}}}
- */
+const fs = require ('fs');
+const {RestClient} = require('@pxtrn/bybit-api');
+const dotenv = require('dotenv');
+dotenv.config();
 
 global.data = {
     price: {
@@ -29,78 +26,72 @@ global.data = {
     }
 }
 
-/**
- * Вспомогательный класс дял работы с биржами.
- * Чтобы не пришлось подключать 3ю, 4ую биржу отдельными переменными, можно просто объявить
- * её в конструкторе класса. Общение с биржами уже предусматривает возможность расширения
- */
+const exchange = {
+    bybit: {
+        balance: function (e, coin='BTC') {
+            const client = new RestClient(e.apiKey, e.secret, !e.testnet);
+            return client.getWalletBalance({
+                coin: coin
+            });
+        },
+        limit:function (e, side='Sell', symbol='BTCUSD', qty=0, price=0, take_profit=0, stop_loss=0, time_in_force='GoodTillCancel', reduce_only=false, close_on_trigger=false) {
+            const client = new RestClient(e.apiKey, e.secret, !e.testnet);
 
-class exchange {
+            params = {
+                side: side,
+                symbol: symbol,
+                order_type: "Limit",
+                qty: qty,
+                price: price,
+                time_in_force: 'GoodTillCancel',
+                close_on_trigger: close_on_trigger,
+                reduce_only: reduce_only
+            };
 
-    constructor(exchange={}, testnet=false) {
+            if (stop_loss) {params['stop_loss'] = stop_loss;}
+            if (take_profit) {params['take_profit'] = take_profit;}
 
-        this.exchange = exchange;
+            return client.placeActiveOrder(params);
+        },
+        market:function (e, side='Sell', symbol='BTCUSD', qty=0, take_profit=0, stop_loss=0, time_in_force='GoodTillCancel', reduce_only=false, close_on_trigger=false) {
+            const client = new RestClient(e.apiKey, e.secret, !e.testnet);
 
-        if (testnet) {
-            for (const exchange in this.exchange) {
-                if (typeof this.exchange[exchange].urls == typeof {} && 'test' in this.exchange[exchange].urls) {
-                    this.exchange[exchange].urls.api = this.exchange[exchange].urls.test
-                }
-            }
+            params = {
+                side: side,
+                symbol: symbol,
+                order_type: "Market",
+                qty: qty,
+                time_in_force: 'GoodTillCancel',
+                close_on_trigger: close_on_trigger,
+                reduce_only: reduce_only
+            };
+
+            if (stop_loss) {params['stop_loss'] = stop_loss;}
+            if (take_profit) {params['take_profit'] = take_profit;}
+
+            return client.placeActiveOrder(params);
         }
-
     }
-
-    // Получить баланс биржи
-    balance (exchange) {
-        return (this.exchange[exchange]).fetch_balance();
-    }
-
-    // Купить валюту
-    buy (exchange, pair="BTC/USD", value=1, price=0, market=false) {
-        if (market) {
-            return (this.exchange[exchange]).createMarketBuyOrder(pair, value, price);
-        } else {
-            return (this.exchange[exchange]).createLimitBuyOrder(pair, value, price);
-        }
-    }
-
-    // Продать валюту
-    sell (exchange, pair="BTC/USD", value=1, price=0, market=false) {
-        if (market) {
-            return (this.exchange[exchange]).createMarketSellOrder(pair, value, price);
-        } else {
-            return (this.exchange[exchange]).createLimitSellOrder(pair, value, price);
-        }
-    }
-
-    // Получить позиции. Туда вроде и ордела могут попасть
-    positions (exchange, symbol='BTC/USD') {
-        return this.exchange[exchange].fetchMyTrades(symbol)
-    }
-
-    // Получить пары, доступные для торговли
-    markets (exchange) {
-        return this.exchange[exchange].loadMarkets()
-    }
-
-    // Закрыть ордер
-    close (exchange, id=0, symbol='BTC/USD') {
-        return this.exchange[exchange].cancelOrder(id, symbol);
+}
+const keypair = {
+    bybit: {
+        apiKey: process.env.BYBIT_APIKEY,
+        secret: process.env.BYBIT_SECRET,
+        testnet: process.env.TESTNET == 'false' ? false : true
     }
 }
 
-// Подключаем биржи
-const exchge = new exchange({
-    deribit: new ccxt.deribit({
-        apiKey: 'A1pCeNpp',
-        secret: 'dD_81yOvEPM3IchPmaQTZdJp-nqaK5c-LekGLM1UVRA'
-    }),
-    bybit: new ccxt.bybit({
-        apiKey: 'N5rLZo7KloYMVDlO4r',
-        secret: 'J7uaatltWwKA864mmU4NrQ43GcUB5tWJleWB'
-    })
-}, true);
+// exchange.bybit.balance(keypair.bybit).then(function(e) {
+//     console.log(e);
+// })
+
+// exchange.bybit.limit(keypair.bybit, 'Sell', 'BTCUSD', 5, 14000).then(function(e) {
+//     console.log(e);
+// })
+
+// exchange.bybit.market(keypair.bybit, 'Buy', 'BTCUSD', 10000).then(function(e) {
+//     console.log(e);
+// })
 
 // Набор функций для обработки состояний
 const callback = {
@@ -118,34 +109,55 @@ const callback = {
             if (ByBit && Deribit) {
                 console.log(ByBit, Deribit, Delta)
 
+                fs.appendFileSync('exchange.csv', `${ByBit};${Deribit};${Delta}\n`);
+
                 // Если дельта больше 1, то это значит, что на бирже ByBit  цена выше, чем на Deribit
                 if (Delta > 1) {
 
                     // Проверяем, открыты ли ордера.
                     // Без проверки мы может наплодить сотни ордеров, так-как эта функция вызывается больше раза в секунду
-                    if (!global.data.orders.bybit.open) {
 
-                        exchge.sell('bybit', 'BTC/USD', 1, ByBit)
-                        exchge.buy('bybit', 'BTC/USD', 1, ByBit-5 )
+                    if (!(process.env.SAFE == 'false' ? false : true)) {
 
-                        // Записываем текущее состояние
-                        global.data.orders.bybit.open = true;
-                        global.data.orders.bybit.type = 'short';
+                        if (!global.data.orders.bybit.open) {
 
-                        console.log('Bybit open short', ByBit)
+                            // Записываем текущее состояние
+                            global.data.orders.bybit.open = true;
+                            global.data.orders.bybit.type = 'short';
 
-                    }
+                            exchange.bybit.market(keypair.bybit, 'Sell', 'BTCUSD', process.env.CAPITAL).then(function(e) {
+                                if ('ret_msg' in e && e.ret_msg == 'OK') {
+                                    console.log(e)
+                                }
+                            })
 
-                    if (!global.data.orders.deribit.open) {
+                        }
 
-                        exchge.sell('bybit', 'BTC/USD', 10, Deribit, true)
+                        if (!global.data.orders.deribit.open) {
 
-                        global.data.orders.deribit.open = true;
-                        global.data.orders.deribit.type = 'long';
+                            // Записываем текущее состояние
+                            global.data.orders.deribit.open = true;
+                            global.data.orders.deribit.type = 'long';
 
 
-                        console.log('Deribit open long', Deribit)
+                            console.log('Deribit open long', Deribit)
 
+                        }
+
+                    } else {
+                        if (global.data.orders.bybit.open) {
+
+                            // Записываем текущее состояние
+                            global.data.orders.bybit.open = false;
+                            global.data.orders.bybit.type = 'short';
+
+                            exchange.bybit.market(keypair.bybit, 'Buy', 'BTCUSD', process.env.CAPITAL).then(function(e) {
+                                if ('ret_msg' in e && e.ret_msg == 'OK') {
+                                    console.log(e)
+                                }
+                            })
+
+                        }
                     }
 
                 }
@@ -154,31 +166,6 @@ const callback = {
         }
     }
 }
-
-// Пример получения баланса ByBit
-exchge.balance('bybit').then(function (e) {
-    console.log('ByBit Balance', e.BTC.total)
-})
-
-// Пример получения баланса Deribit
-exchge.balance('deribit').then(function (e) {
-    console.log('Deribit Balance', e.BTC.total)
-})
-
-// Пример получения ордеров
-exchge.positions('bybit').then(function (e) {
-    for (const order of e) {
-
-        console.log('Order', order.info.order_id)
-
-        exchge.close('bybit', "order.info.order_id").then(function(e) {
-            console.log(e)
-        }).catch(function() {
-            console.log('Close position error')
-        })
-
-    }
-})
 
 // Функция для универсального подключения к сокет соеденениям бирж
 function exchange_wss (wss='wss://', send="", callback=null, recursion=false, callback_on_update = false) {

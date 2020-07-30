@@ -4,6 +4,7 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
+    "@pxtrn/bybit-api": "^1.1.5",
     "async": "^3.2.0",
     "bybit": "^1.0.5",
     "ccxt": "^1.32.12",
@@ -45,6 +46,7 @@
       "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz",
       "version": "2.6.9"
     },
+    "dotenv": "^8.2.0",
     "es5-ext": {
       "integrity": "sha512-Xs2Stw6NiNHWypzRTY1MtaG/uJlwCk8kH81920ma8mvN8Xq1gsfhZvpkImLQArw8AHnv8MT2I45J3c0R8slE+Q==",
       "requires": {

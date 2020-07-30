@@ -4,6 +4,8 @@
     <list default="true" id="e458b85e-ce44-4fe3-a13a-5740b4433596" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,7 +30,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Git/crypto-trading-bot" />
     <property name="nodejs_package_manager_path" value="npm" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -40,7 +42,9 @@
       <option name="presentableId" value="Default" />
       <updated>1595924103780</updated>
       <workItem from="1595924106096" duration="3548000" />
-      <workItem from="1595937362757" duration="16483000" />
+      <workItem from="1595937362757" duration="18286000" />
+      <workItem from="1596028899088" duration="10216000" />
+      <workItem from="1596099397667" duration="5244000" />
     </task>
     <servers />
   </component>
@@ -48,10 +52,22 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="717" y="324" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1596100558079">
+      <screen x="0" y="0" width="1920" height="1044" />
+    </state>
+    <state x="717" y="324" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1044@0.0.1920.1044" timestamp="1596100558079" />
+    <state x="743" y="280" width="424" height="483" key="FileChooserDialogImpl" timestamp="1596029581518">
+      <screen x="0" y="0" width="1920" height="1044" />
+    </state>
+    <state x="743" y="280" width="424" height="483" key="FileChooserDialogImpl/0.0.1920.1044@0.0.1920.1044" timestamp="1596029581518" />
     <state x="565" y="136" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1595938493830">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
     <state x="565" y="136" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1044@0.0.1920.1044" timestamp="1595938493830" />
+    <state x="664" y="130" width="592" height="783" key="find.popup" timestamp="1596031887033">
+      <screen x="0" y="0" width="1920" height="1044" />
+    </state>
+    <state x="664" y="130" width="592" height="783" key="find.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596031887033" />
     <state x="624" y="238" key="run.anything.popup" timestamp="1595926878586">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
