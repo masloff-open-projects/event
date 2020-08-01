@@ -5,9 +5,6 @@ function tick_price () {
 
   UI.text = 3;
 
-//  system.exchange.deribit.balance(system.keypair.deribit).then(function(e) {
-//    UI.send(e.result)
-//  })
   
   if (delta.delta > 0) {
   	

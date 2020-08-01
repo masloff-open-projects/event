@@ -118,6 +118,9 @@ global.vm_context = {
     "$": {
         len: (e) => {
             return e.length;
+        },
+        sleep: function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
     },
     e: {
