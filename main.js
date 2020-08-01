@@ -1,12 +1,62 @@
-const ccxt = require ('ccxt');
-const W3CWebSocket = require('websocket').w3cwebsocket;
-const fs = require ('fs');
-const {RestClient} = require('@pxtrn/bybit-api');
+/**
+ * Торговый терминал.
+ * Терминал поддерживает функции программирования действий.
+ */
+
+const stream_wws = require('./lib/exchange_wws.js');
+const stream_exchange = require('./lib/exchange.js');
+const stream_events = require('./lib/events.js');
+const stream_wss_events = require('./lib/wss_events.js');
+const stream_socket = require('./lib/socket.js');
+
 const dotenv = require('dotenv');
+const http = require('http');
+const express = require('express');
+const basicAuth = require('express-basic-auth');
+const bodyParser = require('body-parser');
+const WebSocketServer = require('websocket').server;
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({httpServer: server});
+
 dotenv.config();
+server.listen(4556, '0.0.0.0',function() { });
+
+const keypair = {
+    bybit: {
+        apiKey: process.env.BYBIT_APIKEY,
+        secret: process.env.BYBIT_SECRET,
+        testnet: process.env.TESTNET == 'false' ? false : true
+    },
+    deribit: {
+        apiKey: "A1pCeNpp",
+        secret: "dD_81yOvEPM3IchPmaQTZdJp-nqaK5c-LekGLM1UVRA",
+        testnet: process.env.TESTNET == 'false' ? false : true
+    }
+};
+
+const exchange = new stream_exchange (keypair.bybit, keypair.deribit);
+const e = new stream_events ();
+const wsse = new stream_wss_events ();
+const wss_tunnel = new stream_socket (wss, function (e) { return wsse.wss (e, wsse); })
+
+const fs = require ('fs');
+
+app.use(basicAuth({users: {'trader': 'QmHLY3IlrEkRgR82'}, challenge: true, realm: 'Imb4T3st4pp'}));
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static(__dirname + '/public'));
 
 global.data = {
     price: {
+        bybit: {
+            btc: 0
+        },
+        deribit: {
+            btc: 0
+        }
+    },
+    size: {
         bybit: {
             btc: 0
         },
@@ -23,187 +73,289 @@ global.data = {
             open: false,
             type: ''
         }
+    },
+    positions: {
+        bybit: [],
+        deribit: []
     }
 }
-
-const exchange = {
-    bybit: {
-        balance: function (e, coin='BTC') {
-            const client = new RestClient(e.apiKey, e.secret, !e.testnet);
-            return client.getWalletBalance({
-                coin: coin
+global.vm_context = {
+    UI: {
+        text: "",
+        error: "",
+        console: [],
+        send: function (e) {
+            this.text = e;
+        },
+        log: function (e) {
+            this.console.unshift({
+                message: e,
+                time: new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1"),
+                type: 'message'
             });
+            if (this.console.length > 52) { this.console.pop(); }
         },
-        limit:function (e, side='Sell', symbol='BTCUSD', qty=0, price=0, take_profit=0, stop_loss=0, time_in_force='GoodTillCancel', reduce_only=false, close_on_trigger=false) {
-            const client = new RestClient(e.apiKey, e.secret, !e.testnet);
-
-            params = {
-                side: side,
-                symbol: symbol,
-                order_type: "Limit",
-                qty: qty,
-                price: price,
-                time_in_force: 'GoodTillCancel',
-                close_on_trigger: close_on_trigger,
-                reduce_only: reduce_only
-            };
-
-            if (stop_loss) {params['stop_loss'] = stop_loss;}
-            if (take_profit) {params['take_profit'] = take_profit;}
-
-            return client.placeActiveOrder(params);
+        err: function (e) {
+            this.console.unshift({
+                message: e,
+                time: new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1"),
+                type: 'error'
+            });
+            if (this.console.length > 52) { this.console.pop(); }
         },
-        market:function (e, side='Sell', symbol='BTCUSD', qty=0, take_profit=0, stop_loss=0, time_in_force='GoodTillCancel', reduce_only=false, close_on_trigger=false) {
-            const client = new RestClient(e.apiKey, e.secret, !e.testnet);
-
-            params = {
-                side: side,
-                symbol: symbol,
-                order_type: "Market",
-                qty: qty,
-                time_in_force: 'GoodTillCancel',
-                close_on_trigger: close_on_trigger,
-                reduce_only: reduce_only
-            };
-
-            if (stop_loss) {params['stop_loss'] = stop_loss;}
-            if (take_profit) {params['take_profit'] = take_profit;}
-
-            return client.placeActiveOrder(params);
-        }
-    }
-}
-const keypair = {
-    bybit: {
-        apiKey: process.env.BYBIT_APIKEY,
-        secret: process.env.BYBIT_SECRET,
-        testnet: process.env.TESTNET == 'false' ? false : true
-    }
-}
-
-// exchange.bybit.balance(keypair.bybit).then(function(e) {
-//     console.log(e);
-// })
-
-// exchange.bybit.limit(keypair.bybit, 'Sell', 'BTCUSD', 5, 14000).then(function(e) {
-//     console.log(e);
-// })
-
-// exchange.bybit.market(keypair.bybit, 'Buy', 'BTCUSD', 10000).then(function(e) {
-//     console.log(e);
-// })
-
-// Набор функций для обработки состояний
-const callback = {
-    on: {
-
-        // Вызывается при каждом тике обновления цены
-        update_price: function () {
-
-            // Создаем окружение переменных
-            let ByBit = global.data.price.bybit.btc;
-            let Deribit = global.data.price.deribit.btc;
-            let Delta = ByBit - Deribit;
-
-            // Проверяем, загрузились ли балансы
-            if (ByBit && Deribit) {
-                console.log(ByBit, Deribit, Delta)
-
-                fs.appendFileSync('exchange.csv', `${ByBit};${Deribit};${Delta}\n`);
-
-                // Если дельта больше 1, то это значит, что на бирже ByBit  цена выше, чем на Deribit
-                if (Delta > 1) {
-
-                    // Проверяем, открыты ли ордера.
-                    // Без проверки мы может наплодить сотни ордеров, так-как эта функция вызывается больше раза в секунду
-
-                    if (!(process.env.SAFE == 'false' ? false : true)) {
-
-                        if (!global.data.orders.bybit.open) {
-
-                            // Записываем текущее состояние
-                            global.data.orders.bybit.open = true;
-                            global.data.orders.bybit.type = 'short';
-
-                            exchange.bybit.market(keypair.bybit, 'Sell', 'BTCUSD', process.env.CAPITAL).then(function(e) {
-                                if ('ret_msg' in e && e.ret_msg == 'OK') {
-                                    console.log(e)
-                                }
-                            })
-
-                        }
-
-                        if (!global.data.orders.deribit.open) {
-
-                            // Записываем текущее состояние
-                            global.data.orders.deribit.open = true;
-                            global.data.orders.deribit.type = 'long';
-
-
-                            console.log('Deribit open long', Deribit)
-
-                        }
-
-                    } else {
-                        if (global.data.orders.bybit.open) {
-
-                            // Записываем текущее состояние
-                            global.data.orders.bybit.open = false;
-                            global.data.orders.bybit.type = 'short';
-
-                            exchange.bybit.market(keypair.bybit, 'Buy', 'BTCUSD', process.env.CAPITAL).then(function(e) {
-                                if ('ret_msg' in e && e.ret_msg == 'OK') {
-                                    console.log(e)
-                                }
-                            })
-
-                        }
-                    }
-
-                }
-
+        clearConsole: function () {
+            this.console = [];
+        },
+        chart: {
+            markers: [],
+            marker: function (text='Marker') {
+                const time = Math.round(+new Date()/1000);
+                this.markers.push({ time: time, position: 'aboveBar', color: '#0074f6', shape: 'arrowDown', text: text });
+                if (this.markers.length > 52) { this.markers.shift(); }
             }
         }
+    },
+    "$": {
+        len: (e) => {
+            return e.length;
+        }
+    },
+    e: {
+        bybit: {
+            buy: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
+                if (price) {
+                    return exchange.limit('bybit', 'Buy', symbol, qty, price);
+                } else {
+                    return exchange.market('bybit', 'Buy', symbol, qty);
+                }
+            },
+            sell: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
+                if (price) {
+                    return exchange.limit('bybit', 'Sell', symbol, qty, price);
+                } else {
+                    return exchange.market('bybit', 'Sell', symbol, qty);
+                }
+            },
+        },
+        deribit: {
+            buy: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
+                if (price) {
+                    return exchange.limit('deribit', 'Buy', symbol, qty, price);
+                } else {
+                    return exchange.market('deribit', 'Buy', symbol, qty);
+                }
+            },
+            sell: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
+                if (price) {
+                    return exchange.limit('deribit', 'Sell', symbol, qty, price);
+                } else {
+                    return exchange.market('deribit', 'Sell', symbol, qty);
+                }
+            },
+        }
     }
 }
 
-// Функция для универсального подключения к сокет соеденениям бирж
-function exchange_wss (wss='wss://', send="", callback=null, recursion=false, callback_on_update = false) {
-
-    const client = new W3CWebSocket(wss);
-
-    client.onerror = function() { throw 'Connection Error'; };
-    client.onclose = function() { throw 'Client Closed'; };
-    client.onopen = function() { client.send(send); };
-    client.onmessage = function(e) { callback(e.data); if (recursion) { client.send(send); } if (callback_on_update) {callback_on_update(e.data)} };
-
-}
-
-// ByBit Socket
-exchange_wss('wss://stream-testnet.bybit.com/realtime', JSON.stringify({
+stream_wws (process.env.WWS_BYBIT, JSON.stringify({
     op: "subscribe",
     args: [
         "trade.BTCUSD"
     ]
-}), function (e=null) {
+}), {
+    onmessage: function (e=null) {
 
-    let response = JSON.parse(e);
+        let response = JSON.parse(e);
 
-    if ('data' in response && 'topic' in response && response.topic == 'trade.BTCUSD') {
-        global.data.price.bybit.btc = response.data[0].price;
-    }
+        if ('data' in response && 'topic' in response && response.topic == 'trade.BTCUSD') {
+            global.data.price.bybit.btc = response.data[0].price;
+            global.data.size.bybit.btc = {
+                size: response.data[0].size,
+                side: response.data[0].side,
+            };
+        }
 
-}, false, callback.on.update_price)
-
-// Deribit Socket
-exchange_wss('wss://test.deribit.com/ws/api/v1/', JSON.stringify({
+    },
+    every: e.price
+}, false);
+stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
     "action": "/api/v1/public/index"
-}), function (e=null) {
+}), {
+    onmessage: function (e=null) {
 
-    let response = JSON.parse(e);
+        let response = JSON.parse(e);
 
-    if ('success' in response && response.success == true && 'result' in response) {
-        global.data.price.deribit.btc = response.result.btc;
+        if ('success' in response && response.success == true && 'result' in response) {
+            global.data.price.deribit.btc = response.result.btc;
+        }
+
+    },
+    every: e.price
+}, true);
+
+wsse.register('price', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+            resolve(global.data.price);
+        })
+    ]);
+});
+
+wsse.register('size', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+            resolve(global.data.size);
+        })
+    ]);
+});
+
+wsse.register('balance', function (e) {
+    return Promise.all([
+        exchange.balance('bybit'),
+        exchange.balance('deribit')
+    ]);
+});
+
+wsse.register('connections', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+
+            var device = [];
+
+            for (const connection of wss_tunnel.connections()) {
+                device.push({
+                    ip: connection.remoteAddress
+                });
+            }
+
+            resolve(device);
+        })
+    ]);
+});
+
+wsse.register('console', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+            resolve(global.vm_context);
+        })
+    ]);
+});
+
+wsse.register('delta', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+            resolve({
+                delta: global.data.price.bybit.btc - global.data.price.deribit.btc,
+                delta_abs: Math.abs(global.data.price.bybit.btc - global.data.price.deribit.btc),
+                delta_average: (global.data.price.bybit.btc + global.data.price.deribit.btc) / 2,
+                delta_procent: {
+                    a: (((global.data.price.deribit.btc-global.data.price.bybit.btc)/global.data.price.bybit.btc) * 100) / -1
+                }
+            });
+        })
+    ]);
+});
+
+wsse.register('positions', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+
+            var response = [];
+
+            for (const position of global.data.positions.bybit) {response.push(position)}
+            for (const position of global.data.positions.deribit) {response.push(position)}
+
+            resolve(response);
+        })
+    ]);
+});
+
+setInterval(function () {
+
+    Promise.all([
+        exchange.positions('bybit'),
+        exchange.positions('deribit')
+    ]).then(function ([bybit, deribit]) {
+
+        /**
+         * Стандартизация ...
+         */
+
+        if (bybit.ret_msg == 'ok') {
+
+            global.data.positions.bybit = [];
+
+            for (const position of bybit.result) {
+                if (position.size > 0) {
+
+                    let data = {
+                        exchange: 'ByBit',
+                        symbol: position.symbol,
+                        side: position.side,
+                        size: position.size,
+                        leverage: position.leverage,
+                        take_profit: position.take_profit,
+                        stop_loss: position.stop_loss,
+                        pnl: position.realised_pnl,
+                        created_at: position.created_at,
+                        fee: position.occ_closing_fee,
+                        margin: position.position_margin,
+                        liq: position.liq_price,
+                    };
+
+                    global.data.positions.bybit.push(data);
+                }
+            }
+
+        }
+
+        // For of Deribit positions
+        if ('result' in deribit) {
+
+            global.data.positions.deribit = [];
+
+            for (const position of deribit.result) {
+                if (position.size > 0) {
+
+                    let data = {
+                        exchange: 'Deribit',
+                        symbol: position.instrument_name,
+                        side: position.direction == 'buy' ? 'Buy' : 'Sell',
+                        size: position.size,
+                        leverage: position.leverage,
+                        take_profit: false,
+                        stop_loss: false,
+                        pnl: position.total_profit_loss,
+                        created_at: false,
+                        fee: false,
+                        margin: position.initial_margin,
+                        liq: position.estimated_liquidation_price
+                    };
+
+                    global.data.positions.deribit.push(data);
+                }
+            }
+
+        }
+
+    });
+
+}, 2000);
+
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + "/html/index.html");
+});
+
+app.get('/code', function (req, res) {
+    res.sendFile(__dirname + "/html/logic.html");
+});
+
+app.get('/get/script/user', function (req, res) {
+    res.sendFile(__dirname + "/scripts/user.js");
+});
+
+app.post('/set/script/user', function (req, res) {
+    if ('code' in req.body) {
+        fs.writeFileSync(__dirname + "/scripts/user.js", req.body.code)
     }
-
-}, true, callback.on.update_price)
+    res.sendStatus(200);
+});

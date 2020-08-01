@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Terminal</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/codemirror.min.js" integrity="sha512-H5RyE1jRbGn8d0dsSstZi0SSs23X6Hkkf5hLneEIFyCfP/cBwJ/jFJESBuFBiUyzbGZGa06tnrvw1SboRKdwcA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/mode/javascript/javascript.min.js" integrity="sha512-9miXlEjnHTF+nVGdc2IGOLGTFW2wWkWbd1/7Ltlre+dM53ZSCUQ/PNN+jtsmYqr3ndiD5RW6XQJUm/Hz8JvyOQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/hint/show-hint.min.js" integrity="sha512-ge9uKCpgPmuJY2e2zPXhpYCZfyb1/R7KOOfMZ3SzSX3ZayWpINs3sHnI8LGEHUf6UOFX/D03FVHgR36uRL8/Vw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/hint/javascript-hint.min.js" integrity="sha512-PPI9W6pViVZfJ5uvmYZsHbPwf7T+voS0OpohIrN8Q4CRCCa6JK39JJ0R16HHmyV7EQR8MTa+O56CpWjfKOxl0A==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/lint/javascript-lint.min.js" integrity="sha512-NSKMHamv0oBrbhEoC4XEPEdWjryQmaFpUHmSRbNTebEDMP1HOVUuM7KSAWtYdVeJ2qEdOOsUbKmC7pbJDM2Dpw==" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/codemirror.min.css" integrity="sha512-/BlxZbYLtYGExexketXsTi47eHp+r2kTeq2OHecQPZlfbc7WFXVrwbVW9HOYjI6c9Ti+P60ASmVLxittZ0EBGw==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/theme/darcula.min.css" integrity="sha512-kqCOYFDdyQF4JM8RddA6rMBi9oaLdR0aEACdB95Xl1EgaBhaXMIe8T4uxmPitfq4qRmHqo+nBU2d1l+M4zUx1g==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/hint/show-hint.min.css" integrity="sha512-OmcLQEy8iGiD7PSm85s06dnR7G7C9C0VqahIPAj/KHk5RpOCmnC6R2ob1oK4/uwYhWa9BF1GC6tzxsC8TIx7Jg==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+
+</head>
+<body>
+
+    <div class="logic-error" id="primary-logic-error">
+        ...
+    </div>
+
+    <div class="container-fluid">
+        <section class="row box">
+
+            <div class="col-lg-3 col-md-4">
+
+                <div class="cart data">
+
+                    <h6>Deltas</h6>
+
+                    <div class="value">
+                        Delta: <span class="value" id="delta">0</span>
+                    </div>
+
+                    <div class="value">
+                        Delta ABS: <span class="value" id="delta_abs">0</span>
+                    </div>
+
+                    <div class="value">
+                        Delta Average: <span class="value" id="delta_average">0</span>
+                    </div>
+
+                    <div class="value">
+                        Delta(%A): <span class="value" id="delta_procent_type_a">0</span>
+                    </div>
+
+                </div>
+
+                <div class="cart balance">
+
+                    <h6>Balance</h6>
+
+                    <div class="value">
+                        ByBit: <span class="value" id="balance_bybit">0</span> BTC
+                    </div>
+
+                    <div class="value">
+                        Deribit: <span class="value" id="balance_deribit">0</span> BTC
+                    </div>
+
+                    <h6>PNL</h6>
+
+                    <div class="value">
+                        ByBit Total PNL: <span id="tpnl_bybit" class="">0</span> BTC / <span id="tpnl_bybit_usd" class="value">0</span> $
+                    </div>
+
+                    <div class="value">
+                        ByBit Session PNL: <span id="spnl_bybit" class="">0</span> BTC / <span id="spnl_bybit_usd" class="value">0</span> $
+                    </div>
+
+                    <div class="value">
+                        Deribit Total PNL: <span id="tpnl_deribit" class="">0</span> BTC / <span id="tpnl_deribit_usd" class="value">0</span> $
+                    </div>
+
+                    <div class="value">
+                        Deribit Session PNL: <span id="spnl_deribit" class="">0</span> BTC / <span id="spnl_deribit_usd" class="value">0</span> $
+                    </div>
+
+                </div>
+
+                <div class="cart conditions">
+
+                    <h6>Conditions</h6>
+
+                    <div id="logic-list">
+
+                    </div>
+
+                </div>
+
+                <div class="cart users">
+
+                    <h6>Users</h6>
+
+                    <div id="users-list">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-7 col-md-8">
+                <div class="cart chart-cart">
+
+                    <div id="exchange_chart">
+
+                    </div>
+
+                    <div class="bottom" id="exchange_chart_statusbar">
+                        Connecting..
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-12">
+                <div class="cart controller">
+                    <button id="settings">Settings</button>
+                    <button id="logic">Logic</button>
+                    <button id="logic-editor">Logic Editor</button>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="row box">
+            <div class="col-md-12">
+                <div class="cart">
+                    <table width="100%" id="positions">
+                        <thead>
+                            <tr height="24px" valign="center">
+                                <th>Exchange</th>
+                                <th>Instrument</th>
+                                <th>Side</th>
+                                <th>Size</th>
+                                <th>Leverage</th>
+                                <th>Margin</th>
+                                <th>PNL</th>
+                                <th>Fee</th>
+                                <th>Liquidation price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="row box">
+            <div class="col-md-12">
+                <div class="cart console">
+
+                    <div id="console" class="console">
+
+                    </div>
+
+                    <div class="bottom" id="user-bridge">
+                        Welcome to terminal
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="logic-modal">
+       <div class="modal-area">
+           <textarea name="" id="logic_textarea" cols="60" rows="60" height="800px">f</textarea>
+       </div>
+    </div>
+
+</body>
+</html>
