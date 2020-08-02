@@ -81,13 +81,25 @@
                 topColor: 'rgba(229, 171, 97, 0.56)',
                 bottomColor: 'rgba(229, 171, 97, 0.04)',
                 lineColor: 'rgba(229, 171, 97, 1)',
-                lineWidth: 2,
+                lineWidth: 1,
             }),
             deribit: window.chart_object.addAreaSeries({
                 topColor: 'rgba(32, 197, 173, 0.56)',
                 bottomColor: 'rgba(32, 197, 173, 0.04)',
                 lineColor: 'rgba(32, 197, 173, 1)',
-                lineWidth: 2,
+                lineWidth: 1,
+            }),
+            bittrex: window.chart_object.addAreaSeries({
+                topColor: 'rgba(20, 93, 255, 0.56)',
+                bottomColor: 'rgba(20, 93, 255, 0.04)',
+                lineColor: 'rgba(20, 93, 255, 1)',
+                lineWidth: 1,
+            }),
+            bitmex: window.chart_object.addAreaSeries({
+                topColor: 'rgba(241, 79, 76, 0.56)',
+                bottomColor: 'rgba(241, 79, 76, 0.04)',
+                lineColor: 'rgba(241, 79, 76, 1)',
+                lineWidth: 1,
             }),
             volume: window.chart_object.addHistogramSeries({
                 color: '#26a69a',
@@ -124,7 +136,7 @@ $(document).ready(function (e) {
 
     class chart {
 
-        constructor(max=80000) {
+        constructor(max=60000) {
             this.chart = {}
             this.settings = {
                 max: max
@@ -181,22 +193,25 @@ $(document).ready(function (e) {
 
     const io = new WebSocket(`${location.protocol == 'http:' ? 'ws' : 'wss'}://${location.host}`);
     const wss_stream = new wstream(io);
-    const charter = new chart();
+    const charter = new chart(10000);
 
     io.onerror = function (event) {
         alert('Соединение разорвано')
     }
+
     io.onopen = function (event) {
 
         io.send(JSON.stringify({action: 'balance'}));
-        io.send(JSON.stringify({action: 'delta'}));
+        io.send(JSON.stringify({action: 'indicators'}));
         io.send(JSON.stringify({action: 'conditions'}));
         io.send(JSON.stringify({action: 'positions'}));
+        io.send(JSON.stringify({action: 'orders'}));
         io.send(JSON.stringify({action: 'price'}));
         io.send(JSON.stringify({action: 'size'}));
         io.send(JSON.stringify({action: 'console'}));
         io.send(JSON.stringify({action: 'users'}));
         io.send(JSON.stringify({action: 'connections'}));
+        io.send(JSON.stringify({action: 'liquidations'}));
 
         setInterval(function() {
             io.send(JSON.stringify({action: 'price'}));
@@ -223,11 +238,15 @@ $(document).ready(function (e) {
 
             document.price = price;
 
-            charter.append("exchange/price/bybit", { time: time, value: price.bybit.btc })
-            charter.append("exchange/price/deribit", { time: time, value: price.deribit.btc })
+            if (price.bybit.btc) { charter.append("exchange/price/bybit", { time: time, value: price.bybit.btc }) }
+            if (price.deribit.btc) { charter.append("exchange/price/deribit", { time: time, value: price.deribit.btc }) }
+            if (price.bittrex.btc) { charter.append("exchange/price/bittrex", { time: time, value: price.bittrex.btc }) }
+            if (price.bitmex.btc) { charter.append("exchange/price/bitmex", { time: time, value: price.bitmex.btc }) }
 
             window.chart.bybit.setData(charter.get('exchange/price/bybit'));
             window.chart.deribit.setData(charter.get('exchange/price/deribit'));
+            window.chart.bittrex.setData(charter.get('exchange/price/bittrex'));
+            window.chart.bitmex.setData(charter.get('exchange/price/bitmex'));
             window.chart.bybit.setMarkers(charter.get('exchange/markers'));
 
             $("#exchange_chart_statusbar").text(`Connected!`);
@@ -248,8 +267,8 @@ $(document).ready(function (e) {
             let time = Math.round(+new Date()/1000);
             let size = e[0];
 
-            charter.append("exchange/size/bybit", { time: time, value: size.bybit.btc.size, color: size.bybit.btc.side == 'Buy' ? 'rgba(121, 184, 61, 0.3)' : 'rgba(188, 71, 103, 0.3)' })
-            window.chart.volume.setData(charter.get('exchange/size/bybit'));
+            charter.append("exchange/size/deribit", { time: time, value: size.deribit.btc.size, color: size.deribit.btc.side == 'Buy' ? 'rgba(121, 184, 61, 0.3)' : 'rgba(188, 71, 103, 0.3)' })
+            window.chart.volume.setData(charter.get('exchange/size/deribit'));
 
 
         }
@@ -409,20 +428,26 @@ $(document).ready(function (e) {
 
 
     /**
-     * Получаем данные дельт
+     * Получаем данные индикаторов
      */
 
-    wss_stream.register('delta', function (e=null) {
+    wss_stream.register('indicators', function (e=null) {
         if (typeof e == typeof []) {
 
-            let delta = e[0];
+            let indicators = e[0];
 
-            $("#delta").text((delta.delta ? delta.delta : 0).toFixed(6))
-            $("#delta_abs").text((delta.delta_abs ? delta.delta_abs : 0).toFixed(6))
-            $("#delta_average").text((delta.delta_average ? delta.delta_average : 0).toFixed(2))
-            $("#delta_procent_type_a").text((delta.delta_procent.a ? delta.delta_procent.a : 0).toFixed(4))
+            $('#deltas-list').html('');
 
-            wss_stream.send('delta');
+            for (const e in indicators) {
+                for (const e_ in indicators[e]) {
+                    if (e != e_) {
+                        let delta = indicators[e][e_].delta;
+                        $('#deltas-list').append(`<div class="delta">${e}/${e_}: <span class="${delta > 0 ? 'int-up' : "int-down"}">${parseFloat(delta).toFixed(2)}</span></div>`);
+                    }
+                }
+            }
+
+            wss_stream.send('indicators');
 
         }
     });
@@ -456,6 +481,52 @@ $(document).ready(function (e) {
             }
 
             wss_stream.send('positions');
+
+        }
+    });
+
+
+    /**
+     * Получаем данные ликвидаций
+     */
+
+    wss_stream.register('liquidations', function (e=null) {
+        if (typeof e == typeof []) {
+
+            let liquidations = e[0];
+
+            if ('size' in liquidations) {
+                $("#liquidation-list").html(`<div class="item ${liquidations.size == 'Sell' ? 'sell' : 'buy' }"> <span>BTC</span> <b class="value">${liquidations.leavesQty}</b> </div>`);
+            }
+
+            wss_stream.send('liquidations');
+
+        }
+    });
+
+
+    /**
+     * Получаем данные ордеров
+     */
+
+    wss_stream.register('orders', function (e=null) {
+        if (typeof e == typeof []) {
+
+            let orders = e[0];
+
+            for (let i = 0; i < 10; i++) {
+                $(`#bp${i}`).text(orders.bitmex.bids[i][0]);
+                $(`#bq${i}`).text(orders.bitmex.bids[i][1]);
+                $(`#bp${i}`).css('width', `${(orders.bitmex.bids[i][1] / 60000) < 88 ? orders.bitmex.bids[i][1] / 60000 : 54}%`)
+            }
+
+            for (let i = 0; i < 10; i++) {
+                $(`#sp${i}`).text(orders.bitmex.asks[i][0]);
+                $(`#sq${i}`).text(orders.bitmex.asks[i][1]);
+                $(`#sp${i}`).css('width', `${(orders.bitmex.asks[i][1] / 60000) < 88 ? orders.bitmex.asks[i][1] / 60000 : 54}%`)
+            }
+
+            wss_stream.send('orders');
 
         }
     });

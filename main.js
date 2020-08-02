@@ -14,10 +14,13 @@ const stream_telegram = require('./lib/telegram.js');
 const fs = require ('fs');
 const dotenv = require('dotenv');
 const http = require('http');
+const level = require('level')
 const express = require('express');
+const bittrex = require('node-bittrex-api');
 const basicAuth = require('express-basic-auth');
 const bodyParser = require('body-parser');
 const WebSocketServer = require('websocket').server;
+const BitMEXClient = require('bitmex-realtime-api');
 
 const app = express();
 const server = http.createServer(app);
@@ -53,8 +56,10 @@ const telegram = new stream_telegram (process.env.TELEGRAM_TOKEN, [
         id: 3493682
     }
 ]);
+const db = level('db/default')
+const bmc = new BitMEXClient({testnet: !process.env.TESTNET});
 
-app.use(basicAuth({users: {'trader': 'QmHLY3IlrEkRgR82'}, challenge: true, realm: 'Imb4T3st4pp'}));
+app.use(basicAuth({users: {'trader': 'QmHLY3IlrEkRgR82', 'root': 'root'}, challenge: true, realm: 'Imb4T3st4pp'}));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + '/public'));
 
@@ -65,37 +70,11 @@ global.data = {
         },
         deribit: {
             btc: 0
-        }
-    },
-    size: {
-        bybit: {
+        },
+        bitmex: {
             btc: 0
         },
-        deribit: {
-            btc: 0
-        }
-    },
-    orders: {
-        bybit: {
-            open: false,
-            type: ''
-        },
-        deribit: {
-            open: false,
-            type: ''
-        }
-    },
-    positions: {
-        bybit: [],
-        deribit: []
-    }
-}
-global.data = {
-    price: {
-        bybit: {
-            btc: 0
-        },
-        deribit: {
+        bittrex: {
             btc: 0
         }
     },
@@ -105,21 +84,30 @@ global.data = {
         },
         deribit: {
             btc: 0
-        }
-    },
-    orders: {
-        bybit: {
-            open: false,
-            type: ''
         },
-        deribit: {
-            open: false,
-            type: ''
+        bitmex: {
+            btc: 0
+        },
+        bittrex: {
+            btc: 0
         }
     },
     positions: {
         bybit: [],
-        deribit: []
+        deribit: [],
+        bitmex: [],
+        bittrex: []
+    },
+    indicators: {
+    },
+    book: {
+        bitmex: {
+            bids: [],
+            asks: []
+        }
+    },
+    liquidation: {
+        bitmex: {}
     }
 }
 global.vm_context = {
@@ -254,19 +242,87 @@ stream_wws (process.env.WWS_BYBIT, JSON.stringify({
     every: e.price
 }, false);
 stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
-    "action": "/api/v1/public/index"
+    "jsonrpc": "2.0",
+    "method": "public/get_index",
+    "id": 12,
+    "params": {
+        "currency": "BTC"
+    }
 }), {
     onmessage: function (e=null) {
 
         let response = JSON.parse(e);
 
-        if ('success' in response && response.success == true && 'result' in response) {
-            global.data.price.deribit.btc = response.result.btc;
+        if ('id' in response && response.id == 12 && 'result' in response) {
+            global.data.price.deribit.btc = response.result.BTC;
         }
 
     },
     every: e.price
 }, true);
+stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
+    "jsonrpc" : "2.0",
+    "id" : 9290,
+    "method" : "public/get_last_trades_by_currency",
+    "params" : {
+        "currency" : "BTC",
+        "count" : 10
+    }
+}), {
+    onmessage: function (e=null) {
+
+        let response = JSON.parse(e);
+
+        for (const position of response.result.trades) {
+            global.data.size.deribit.btc = {
+                size: position.amount,
+                side: position.direction == 'sell' ? 'Sell' : 'Buy',
+            };
+        }
+
+    }
+}, true);
+bittrex.websockets.listen(function(data, client) {
+    if (data.M === 'updateSummaryState') {
+        data.A.forEach(function(data_for) {
+            data_for.Deltas.forEach(function(marketsDelta) {
+                if (marketsDelta.MarketName == 'USDT-BTC') {
+                    if ('Last' in marketsDelta) {
+                        global.data.price.bittrex.btc = marketsDelta.Last;
+                        e.price();
+                    }
+                }
+            });
+        });
+    }
+});
+bmc.addStream('XBTUSD', 'trade', function (data, symbol, tableName) {
+    if (!data.length) return;
+    const operate = data[0];
+
+    global.data.price.bitmex.btc = operate.price;
+    global.data.size.bitmex.btc = {
+        size: operate.size,
+        side: operate.side,
+    };
+
+    e.price();
+
+});
+bmc.addStream('XBTUSD', 'liquidation', function (data, symbol, tableName) {
+    if (!data.length) return;
+    const operate = data[0];
+
+    global.data.liquidation.bitmex = operate;
+
+});
+bmc.addStream('XBTUSD', 'orderBook10', function (data, symbol, tableName) {
+    if (!data.length) return;
+    const operate = data[0];
+    global.data.book.bitmex.asks = operate.asks;
+    global.data.book.bitmex.bids = operate.bids;
+
+});
 
 wsse.register('price', function (e) {
     return Promise.all([
@@ -311,22 +367,17 @@ wsse.register('connections', function (e) {
 wsse.register('console', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
-            resolve(global.vm_context);
+            resolve({
+                UI: global.vm_context.UI
+            });
         })
     ]);
 });
 
-wsse.register('delta', function (e) {
+wsse.register('indicators', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
-            resolve({
-                delta: global.data.price.bybit.btc - global.data.price.deribit.btc,
-                delta_abs: Math.abs(global.data.price.bybit.btc - global.data.price.deribit.btc),
-                delta_average: (global.data.price.bybit.btc + global.data.price.deribit.btc) / 2,
-                delta_procent: {
-                    a: (((global.data.price.deribit.btc-global.data.price.bybit.btc)/global.data.price.bybit.btc) * 100) / -1
-                }
-            });
+            resolve(global.data.indicators);
         })
     ]);
 });
@@ -341,6 +392,22 @@ wsse.register('positions', function (e) {
             for (const position of global.data.positions.deribit) {response.push(position)}
 
             resolve(response);
+        })
+    ]);
+});
+
+wsse.register('liquidations', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+            resolve(global.data.liquidation);
+        })
+    ]);
+});
+
+wsse.register('orders', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+            resolve(global.data.book)
         })
     ]);
 });
@@ -417,7 +484,6 @@ setInterval(function () {
 
 }, 2000);
 
-telegram.send('Hello');
 telegram.listen();
 
 app.get('/', function (req, res) {

@@ -7,6 +7,7 @@
     "@pxtrn/bybit-api": "^1.1.5",
     "assign-deep": "^1.0.1",
     "async": "^3.2.0",
+    "bitmex-realtime-api": "^0.4.3",
     "body-parser": "^1.19.0",
     "bybit": "^1.0.5",
     "ccxt": "^1.32.12",
@@ -122,6 +123,8 @@
       "resolved": "https://registry.npmjs.org/is-typedarray/-/is-typedarray-1.0.0.tgz",
       "version": "1.0.0"
     },
+    "level": "^6.0.1",
+    "local-db": "^2.0.0",
     "md5.js": {
       "integrity": "sha512-xitP+WxNPcTTOgnTJcrhM0xvdPepipPSf3I8EIpGKeFLjt3PlJLIDG3u8EX53ZIubkb+5U2+3rELYpEhHhzdkg==",
       "requires": {
@@ -147,6 +150,7 @@
       "resolved": "https://registry.npmjs.org/next-tick/-/next-tick-1.0.0.tgz",
       "version": "1.0.0"
     },
+    "node-bittrex-api": "^0.8.3",
     "node-rest-client": {
       "dependencies": {
         "debug": {
@@ -178,6 +182,7 @@
       "resolved": "https://registry.npmjs.org/nodejs-websocket/-/nodejs-websocket-1.7.2.tgz",
       "version": "1.7.2"
     },
+    "pouchdb": "^7.2.2",
     "q": {
       "integrity": "sha1-fjL3W0E4EpHQRhHxvxQQmsAGUdc=",
       "resolved": "https://registry.npmjs.org/q/-/q-1.5.1.tgz",

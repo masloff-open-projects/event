@@ -48,6 +48,107 @@ div.cart + .conditions {
     overflow-y: auto;
 }
 
+div.cart + .liquidation {
+    margin-top: 32px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+div.cart + .liquidation  > h6 {
+    padding: 4px 8px;
+    margin: 4px 0px;
+    font-width: bold;
+}
+
+div.cart + .orders {
+    margin-top: 32px;
+    max-height: 440px;
+    overflow-y: auto;
+}
+
+div.cart + .orders  > h6 {
+    padding: 4px 8px;
+    margin: 4px 0px;
+    font-width: bold;
+}
+
+div.cart + .orders > #orders-list > tbody > tr > td:last-child {
+    float: right;
+}
+
+div.cart + .orders > #orders-list > tbody > tr > td:first-child {
+   float: left;
+    transition: 0.6s;
+}
+
+div.cart + .orders > #orders-list > tbody > tr > td {
+    padding: 4px;
+}
+
+div.cart + .orders > #orders-list > tbody > tr {
+    padding: 8px;
+    margin: 8px;
+
+    overflow: hidden;
+}
+
+div.cart + .orders > #orders-list > tbody > tr > .buy {
+    background: rgba(125, 179, 67, 0.4);
+    font-weight: bold;
+}
+
+div.cart + .orders > #orders-list > tbody > tr > .sell {
+    background: rgba(241, 79, 76, 0.4);
+    font-weight: bold;
+}
+
+div.cart + .orders > #orders-list {
+    padding: 4px 8px;
+    margin: 4px 8px;
+}
+
+div.cart + .orders > #orders-list > div.buy > span.price {
+    float: left;
+}
+
+div.cart + .orders > #orders-list > div.buy > span.qty {
+    float: right;
+}
+
+div.cart + .orders > #orders-list > div.sell > span.price {
+    float: left;
+}
+
+div.cart + .orders > #orders-list > div.sell > span.qty {
+    float: right;
+}
+
+div.cart + .liquidation > #liquidation-list > div.item {
+    margin: 12px 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+div.cart + .liquidation > #liquidation-list > div.buy {
+
+    background: rgb(35,35,35);
+    background: -moz-linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(114,163,63,1) 90%, rgba(93,129,55,1) 100%);
+    background: -webkit-linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(114,163,63,1) 90%, rgba(93,129,55,1) 100%);
+    background: linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(114,163,63,1) 90%, rgba(93,129,55,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#232323",endColorstr="#5d8137",GradientType=1);
+
+}
+
+div.cart + .liquidation > #liquidation-list > div.sell {
+
+    background: rgb(35,35,35);
+    background: -moz-linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(241,79,76,1) 90%, rgba(199,60,57,1) 100%);
+    background: -webkit-linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(241,79,76,1) 90%, rgba(199,60,57,1) 100%);
+    background: linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(241,79,76,1) 90%, rgba(199,60,57,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#232323",endColorstr="#c73c39",GradientType=1);
+
+}
+
 div.cart + .users {
     margin-top: 32px;
     max-height: 240px;
@@ -105,6 +206,12 @@ div.cart + .balance  > div.value {
 div.data > div.value {
     padding: 4px 8px;
     margin: 4px 0px;
+}
+
+div.data > div#deltas-list,
+div.data > div#deltas-list > div.delta {
+    padding: 2px 2px;
+    margin: 2px 2px;
 }
 
 div.data  > h6 {
@@ -260,6 +367,14 @@ span.pnl-up {
 span.pnl-down {
     color: #f14f4c !important;
     font-weight: bold !important;
+}
+
+.int-up {
+    color: rgba(125, 179, 67, 1);
+}
+
+.int-down {
+    color: rgba(241, 79, 76, 1);
 }
 
 .CodeMirror {

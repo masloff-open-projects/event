@@ -43,22 +43,10 @@
 
                 <div class="cart data">
 
-                    <h6>Deltas</h6>
+                    <h6>Indicators / Delta</h6>
 
-                    <div class="value">
-                        Delta: <span class="value" id="delta">0</span>
-                    </div>
+                    <div id="deltas-list">
 
-                    <div class="value">
-                        Delta ABS: <span class="value" id="delta_abs">0</span>
-                    </div>
-
-                    <div class="value">
-                        Delta Average: <span class="value" id="delta_average">0</span>
-                    </div>
-
-                    <div class="value">
-                        Delta(%A): <span class="value" id="delta_procent_type_a">0</span>
                     </div>
 
                 </div>
@@ -118,6 +106,7 @@
             </div>
 
             <div class="col-lg-7 col-md-8">
+
                 <div class="cart chart-cart">
 
                     <div id="exchange_chart">
@@ -129,14 +118,144 @@
                     </div>
 
                 </div>
+
             </div>
 
             <div class="col-lg-2 col-md-12">
+
                 <div class="cart controller">
                     <button id="settings">Settings</button>
-                    <button id="logic">Logic</button>
+                    <button id="logic">Fast Logic Editor</button>
                     <button id="logic-editor">Logic Editor</button>
                 </div>
+
+                <div class="cart liquidation">
+
+                    <h6>Last liquidation on <b>BitMex</b> </h6>
+
+                    <div id="liquidation-list">
+
+                    </div>
+
+                </div>
+
+                <div class="cart orders">
+
+                    <h6>Orders on <b>Deribit</b> </h6>
+
+                    <table width="94%" id="orders-list">
+
+                       <tbody>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp0">0</td>
+                               <td id="bq0">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp1">0</td>
+                               <td id="bq1">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp2">0</td>
+                               <td id="bq2">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp3">0</td>
+                               <td id="bq3">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp4">0</td>
+                               <td id="bq4">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp5">0</td>
+                               <td id="bq5">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp6">0</td>
+                               <td id="bq6">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp7">0</td>
+                               <td id="bq7">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp8">0</td>
+                               <td id="bq8">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="buy" id="bp9">0</td>
+                               <td id="bq9">0</td>
+                           </tr>
+
+                           <!--- ---->
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp0">0</td>
+                               <td id="sq0">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp1">0</td>
+                               <td id="sq1">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp2">0</td>
+                               <td id="sq2">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp3">0</td>
+                               <td id="sq3">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp4">0</td>
+                               <td id="sq4">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp5">0</td>
+                               <td id="sq5">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp6">0</td>
+                               <td id="sq6">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp7">0</td>
+                               <td id="sq7">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp8">0</td>
+                               <td id="sq8">0</td>
+                           </tr>
+
+                           <tr width="100%">
+                               <td width="50%" class="sell" id="sp9">0</td>
+                               <td id="sq9">0</td>
+                           </tr>
+
+
+                       </tbody>
+
+                    </table>
+
+                </div>
+
             </div>
 
         </section>
@@ -187,7 +306,9 @@
 
     <div class="modal fade" tabindex="-1" role="dialog" id="logic-modal">
        <div class="modal-area">
-           <textarea name="" id="logic_textarea" cols="60" rows="60" height="800px">f</textarea>
+           <textarea name="" id="logic_textarea" cols="60" rows="60" height="800px">
+
+           </textarea>
        </div>
     </div>
 
