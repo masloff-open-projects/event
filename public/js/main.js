@@ -267,7 +267,7 @@ $(document).ready(function (e) {
         if (typeof e[0] == typeof []) {
             $("#users-list").text('');
             for (const device of e[0]) {
-                $("#users-list").append(`<div class="user"> <i class="fa fa-circle user-online-indicator" aria-hidden="true"></i> <b>${'Unknown'}</b>: ${device.ip}</div>`);
+                $("#users-list").append(`<div class="user"> <i class="fa fa-circle user-online-indicator" aria-hidden="true"></i> <b>${'0'}</b>: ${device.ip}</div>`);
             }
         }
 
@@ -289,13 +289,13 @@ $(document).ready(function (e) {
                 let bybit_tpnl_usd = parseFloat(bybit_tpnl) * ('price' in document ? document.price.bybit.btc : 0);
                 let bybit_spnl_usd = parseFloat(bybit_spnl) * ('price' in document ? document.price.bybit.btc : 0);
 
-                $("#balance_bybit").text(balance ? parseFloat(balance).toFixed(4) : 'Unknown');
+                $("#balance_bybit").text(balance ? parseFloat(balance).toFixed(4) : '0');
 
-                $("#spnl_bybit").text(bybit_spnl_usd ? parseFloat(bybit_spnl_usd).toFixed(4) : 'Unknown')
-                $('#spnl_bybit_usd').text(bybit_spnl_usd ? parseFloat(bybit_spnl_usd).toFixed(2) : 'Unknown')
+                $("#spnl_bybit").text(bybit_spnl_usd ? parseFloat(bybit_spnl_usd).toFixed(4) : '0')
+                $('#spnl_bybit_usd').text(bybit_spnl_usd ? parseFloat(bybit_spnl_usd).toFixed(2) : '0')
 
-                $("#tpnl_bybit").text(bybit_tpnl ? parseFloat(bybit_tpnl).toFixed(4) : 'Unknown')
-                $('#tpnl_bybit_usd').text(bybit_tpnl_usd ? parseFloat(bybit_tpnl_usd).toFixed(2) : 'Unknown')
+                $("#tpnl_bybit").text(bybit_tpnl ? parseFloat(bybit_tpnl).toFixed(4) : '0')
+                $('#tpnl_bybit_usd').text(bybit_tpnl_usd ? parseFloat(bybit_tpnl_usd).toFixed(2) : '0')
 
                 if (bybit_tpnl > 0) { $('#tpnl_bybit').addClass("pnl-up"); } else { $('#tpnl_bybit').addClass("pnl-down"); }
                 if (bybit_spnl > 0) { $('#spnl_bybit').addClass("pnl-up"); } else { $('#spnl_bybit').addClass("pnl-down"); }
@@ -312,13 +312,13 @@ $(document).ready(function (e) {
             let deribit_tpnl_usd = parseFloat(deribit_tpnl) * ('price' in document ? document.price.deribit.btc : 0);
             let deribit_spnl_usd = parseFloat(deribit_spnl) * ('price' in document ? document.price.deribit.btc : 0);
 
-            $("#balance_deribit").text(balance ? parseFloat(balance).toFixed(4) : 'Unknown');
+            $("#balance_deribit").text(balance ? parseFloat(balance).toFixed(4) : '0');
 
-            $("#spnl_deribit").text(deribit_spnl ? parseFloat(deribit_spnl).toFixed(4) : 'Unknown')
-            $('#spnl_deribit_usd').text(deribit_spnl_usd ? parseFloat(deribit_spnl_usd).toFixed(2) : 'Unknown')
+            $("#spnl_deribit").text(deribit_spnl ? parseFloat(deribit_spnl).toFixed(4) : '0')
+            $('#spnl_deribit_usd').text(deribit_spnl_usd ? parseFloat(deribit_spnl_usd).toFixed(2) : '0')
 
-            $("#tpnl_deribit").text(deribit_tpnl ? parseFloat(deribit_tpnl).toFixed(4) : 'Unknown')
-            $('#tpnl_deribit_usd').text(deribit_tpnl_usd ? parseFloat(deribit_tpnl_usd).toFixed(2) : 'Unknown')
+            $("#tpnl_deribit").text(deribit_tpnl ? parseFloat(deribit_tpnl).toFixed(4) : '0')
+            $('#tpnl_deribit_usd').text(deribit_tpnl_usd ? parseFloat(deribit_tpnl_usd).toFixed(2) : '0')
 
             if (deribit_tpnl > 0) { $('#tpnl_deribit').addClass("pnl-up"); } else { $('#tpnl_deribit').addClass("pnl-down"); }
             if (deribit_spnl > 0) { $('#spnl_deribit').addClass("pnl-up"); } else { $('#spnl_deribit').addClass("pnl-down"); }
@@ -443,14 +443,14 @@ $(document).ready(function (e) {
 
                 $(`table#positions > tbody`).append(`<tr height="32px" valign="center">
                     <td><b>${position.exchange}</b></td>
-                    <td>${position.symbol ? position.symbol : 'Unknown'}</td>
+                    <td>${position.symbol ? position.symbol : '0'}</td>
                     <td>${position.side == 'Buy' ? `<span class='marker-buy'> <i class="fa fa-sort-up" aria-hidden="true"></i> Buy</span>` : `<span class='marker-sell'> <i class="fa fa-sort-down" aria-hidden="true"></i> Sell</span>`}</td>
-                    <td>${position.size ? (position.size).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : 'Unknown'} USD</td>
-                    <td>${position.leverage ? position.leverage : 'Unknown'}</td>
-                    <td>${position.margin ? parseFloat(position.margin).toFixed(6) : 'Unknown'}</td>
-                    <td><span class="${position.pnl > 0 ? 'pnl-up' : 'pnl-down'}">${position.pnl ? parseFloat(position.pnl).toFixed(6) : 'Unknown'}</span> BTC</td>
-                    <td>${position.fee ? position.fee : 'Unknown'}</td>
-                    <td>${position.liq ? position.liq : 'Unknown'}</td>
+                    <td>${position.size ? (position.size).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : '0'} USD</td>
+                    <td>${position.leverage ? position.leverage : '0'}</td>
+                    <td>${position.margin ? parseFloat(position.margin).toFixed(6) : '0'}</td>
+                    <td><span class="${position.pnl > 0 ? 'pnl-up' : 'pnl-down'}">${position.pnl ? parseFloat(position.pnl).toFixed(6) : '0'}</span> BTC</td>
+                    <td>${position.fee ? position.fee : '0'}</td>
+                    <td>${position.liq ? position.liq : '0'}</td>
                 </tr>`);
 
             }

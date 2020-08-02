@@ -24,7 +24,7 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({httpServer: server});
 
 dotenv.config();
-server.listen(4556, '0.0.0.0',function() { });
+server.listen(process.env.PORT, process.env.IP,function() { });
 
 const keypair = {
     bybit: {
