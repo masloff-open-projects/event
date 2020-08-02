@@ -5,6 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "@pxtrn/bybit-api": "^1.1.5",
+    "assign-deep": "^1.0.1",
     "async": "^3.2.0",
     "body-parser": "^1.19.0",
     "bybit": "^1.0.5",
@@ -171,6 +172,7 @@
       "resolved": "https://registry.npmjs.org/node-rest-client/-/node-rest-client-3.1.0.tgz",
       "version": "3.1.0"
     },
+    "node-telegram-bot-api": "^0.50.0",
     "nodejs-websocket": {
       "integrity": "sha512-PFX6ypJcCNDs7obRellR0DGTebfUhw1SXGKe2zpB+Ng1DQJhdzbzx1ob+AvJCLzy2TJF4r8cCDqMQqei1CZdPQ==",
       "resolved": "https://registry.npmjs.org/nodejs-websocket/-/nodejs-websocket-1.7.2.tgz",

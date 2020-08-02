@@ -8,7 +8,10 @@ const stream_exchange = require('./lib/exchange.js');
 const stream_events = require('./lib/events.js');
 const stream_wss_events = require('./lib/wss_events.js');
 const stream_socket = require('./lib/socket.js');
+const stream_actions = require('./lib/actions.js');
+const stream_telegram = require('./lib/telegram.js');
 
+const fs = require ('fs');
 const dotenv = require('dotenv');
 const http = require('http');
 const express = require('express');
@@ -37,11 +40,19 @@ const keypair = {
 };
 
 const exchange = new stream_exchange (keypair.bybit, keypair.deribit);
-const e = new stream_events ();
 const wsse = new stream_wss_events ();
 const wss_tunnel = new stream_socket (wss, function (e) { return wsse.wss (e, wsse); })
-
-const fs = require ('fs');
+const a = new stream_actions ();
+const telegram = new stream_telegram (process.env.TELEGRAM_TOKEN, [
+    {
+        name: 'Владислав',
+        id: 1138495203
+    },
+    {
+        name: 'Иван',
+        id: 3493682
+    }
+]);
 
 app.use(basicAuth({users: {'trader': 'QmHLY3IlrEkRgR82'}, challenge: true, realm: 'Imb4T3st4pp'}));
 app.use(bodyParser.urlencoded({extended: true}));
@@ -79,12 +90,45 @@ global.data = {
         deribit: []
     }
 }
+global.data = {
+    price: {
+        bybit: {
+            btc: 0
+        },
+        deribit: {
+            btc: 0
+        }
+    },
+    size: {
+        bybit: {
+            btc: 0
+        },
+        deribit: {
+            btc: 0
+        }
+    },
+    orders: {
+        bybit: {
+            open: false,
+            type: ''
+        },
+        deribit: {
+            open: false,
+            type: ''
+        }
+    },
+    positions: {
+        bybit: [],
+        deribit: []
+    }
+}
 global.vm_context = {
+    env: process.env,
     UI: {
         text: "",
         error: "",
         console: [],
-        send: function (e) {
+        set: function (e) {
             this.text = e;
         },
         log: function (e) {
@@ -116,48 +160,77 @@ global.vm_context = {
         }
     },
     "$": {
+        _: {
+            wait: false
+        },
         len: (e) => {
             return e.length;
         },
-        sleep: function sleep(ms) {
+        sleep: function (ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        },
+        wait: function (ms) {
+            const date = Date.now();
+            let currentDate = null;
+            do {
+                currentDate = Date.now();
+            } while (currentDate - date < ms);
+        },
+        mwait: function (ms, callback) {
+           if ('mwait_session' in global && global.mwait_session) {
+
+           } else {
+               callback();
+               global.mwait_session = true;
+               setTimeout(function (){
+                   global.mwait_session = false
+               }, ms);
+           }
         }
     },
-    e: {
-        bybit: {
-            buy: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
-                if (price) {
-                    return exchange.limit('bybit', 'Buy', symbol, qty, price);
-                } else {
-                    return exchange.market('bybit', 'Buy', symbol, qty);
-                }
-            },
-            sell: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
-                if (price) {
-                    return exchange.limit('bybit', 'Sell', symbol, qty, price);
-                } else {
-                    return exchange.market('bybit', 'Sell', symbol, qty);
-                }
-            },
+    tlg: telegram,
+    bybit: {
+        positions: [],
+        buy: (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') => {
+            if (price) {
+                return exchange.limit('bybit', 'Buy', symbol, qty, price);
+            } else {
+                return exchange.market('bybit', 'Buy', symbol, qty);
+            }
         },
-        deribit: {
-            buy: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
-                if (price) {
-                    return exchange.limit('deribit', 'Buy', symbol, qty, price);
-                } else {
-                    return exchange.market('deribit', 'Buy', symbol, qty);
-                }
-            },
-            sell: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
-                if (price) {
-                    return exchange.limit('deribit', 'Sell', symbol, qty, price);
-                } else {
-                    return exchange.market('deribit', 'Sell', symbol, qty);
-                }
-            },
+        sell: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
+            if (price) {
+                return exchange.limit('bybit', 'Sell', symbol, qty, price);
+            } else {
+                return exchange.market('bybit', 'Sell', symbol, qty);
+            }
         }
+    },
+    deribit: {
+        positions: [],
+        buy: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {
+            if (price) {
+                return exchange.limit('deribit', 'Buy', symbol, qty, price);
+            } else {
+                return exchange.market('deribit', 'Buy', symbol, qty);
+            }
+        },
+        sell: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {
+            if (price) {
+                return exchange.limit('deribit', 'Sell', symbol, qty, price);
+            } else {
+                return exchange.market('deribit', 'Sell', symbol, qty);
+            }
+        },
     }
 }
+global.vm_scripts = {
+    init: fs.readFileSync(__dirname + "/scripts/init.js"),
+    everyPrice: fs.readFileSync(__dirname + "/scripts/everyPrice.js"),
+    everyPriceWait: fs.readFileSync(__dirname + "/scripts/everyPriceWait.js")
+}
+
+const e = new stream_events ();
 
 stream_wws (process.env.WWS_BYBIT, JSON.stringify({
     op: "subscribe",
@@ -343,6 +416,9 @@ setInterval(function () {
     });
 
 }, 2000);
+
+telegram.send('Hello');
+telegram.listen();
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + "/html/index.html");

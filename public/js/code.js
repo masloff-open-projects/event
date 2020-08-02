@@ -26,20 +26,24 @@ $(document).ready(function () {
                         });
 
                     },
-                    "Ctrl": "autocomplete"
+                    "Alt": "autocomplete"
                 }
             });
-            window.logic_editor.on("keyup", function (cm, event) {
-                if (event.keyCode != 13 && event.keyCode != 39 && event.keyCode != 37 && event.keyCode != 8 && !cm.state.completionActive) {
-                    clearTimeout(window.cm_autocomplite);
-                    window.cm_autocomplite = setTimeout(function () {
-                        CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
-                    }, 1550);
 
-                } else if (event.keyCode == 13 || event.keyCode == 8) {
-                    clearTimeout(window.cm_autocomplite);
+            window.logic_editor.on("keyup", function (cm, event) {
+                if (window.hits) {
+                    if (event.keyCode != 13 && event.keyCode != 39 && event.keyCode != 37 && event.keyCode != 8 && !cm.state.completionActive) {
+                        clearTimeout(window.cm_autocomplite);
+                        window.cm_autocomplite = setTimeout(function () {
+                            CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+                        }, 1550);
+
+                    } else if (event.keyCode == 13 || event.keyCode == 8) {
+                        clearTimeout(window.cm_autocomplite);
+                    }
                 }
             });
+
 
         });
 
