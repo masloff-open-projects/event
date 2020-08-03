@@ -605,7 +605,7 @@ setInterval(function () {
             global.data.positions.deribit = [];
 
             for (const position of deribit.result) {
-                if ('size' in position) {
+                try {
 
                     let data = {
                         exchange: 'Deribit',
@@ -623,7 +623,9 @@ setInterval(function () {
                     };
 
                     global.data.positions.deribit.push(data);
-                }
+
+                } catch (e) { global.vm_context.UI.err(e.message) }
+
             }
 
         }

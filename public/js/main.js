@@ -440,7 +440,7 @@ $(document).ready(function (e) {
 
                         $(`#delta-data-${e}-${e_}-name`).text(`${e}/${e_}`);
                         $(`#delta-data-${e}-${e_}-name`).attr('class', delta > 0 ? 'up' : 'down');
-                        $(`#delta-data-${e}-${e_}-name`).css('width', `${Math.abs(delta) > 70 ? 70 : delta}%`);
+                        $(`#delta-data-${e}-${e_}-name`).css('width', `${Math.abs(delta) > 70 ? 70 : Math.abs(delta)}%`);
                         $(`#delta-data-${e}-${e_}-value`).text(parseFloat(delta).toFixed(2));
                         $(`#delta-data-${e}-${e_}-value`).attr('class', delta > 0 ? 'int-up' : 'int-down');
 

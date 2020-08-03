@@ -6,7 +6,7 @@ if ((parseInt(new Date().getTime()/1000) - _.get('everyPriceWait_session') > 2))
         try {
             everyPriceWait();
         } catch (e) {
-            UI.error = (e.message);
+            UI.err(e.message)
         }
     }
 
