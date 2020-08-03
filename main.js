@@ -229,6 +229,9 @@ global.vm_context = {
         positions: () => {
             return global.data.positions.deribit;
         },
+        getPositions: () => {
+            return exchange.positions('deribit');
+        },
         volume: () => {
             return global.data.size.deribit;
         },
@@ -602,7 +605,7 @@ setInterval(function () {
             global.data.positions.deribit = [];
 
             for (const position of deribit.result) {
-                if (position.size > 0) {
+                if ('size' in position) {
 
                     let data = {
                         exchange: 'Deribit',
