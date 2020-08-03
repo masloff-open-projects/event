@@ -3,7 +3,7 @@ var global = {
     init: 1
 };
 
-class ___ {
+class __ {
 
     constructor() {
         this.data = {}
@@ -31,7 +31,7 @@ class ___ {
 
 }
 
-var _ = new ___ ();
+const _ = new __ ();
 
 try {
 
