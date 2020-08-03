@@ -32,6 +32,7 @@
       "resolved": "https://registry.npmjs.org/create-hash/-/create-hash-1.2.0.tgz",
       "version": "1.2.0"
     },
+    "csv-writer": "^1.6.0",
     "d": {
       "integrity": "sha512-m62ShEObQ39CfralilEQRjH6oAMtNCV1xJyEx5LpRYUVN+EviphDgUc/F3hnYbADmkiNs67Y+3ylmlG7Lnu+FA==",
       "requires": {

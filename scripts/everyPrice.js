@@ -1,9 +1,7 @@
-try {
-
-    if (typeof everyPrice === "function") {
+if (typeof everyPrice === "function") {
+    try {
         everyPrice ();
+    } catch (e) {
+        UI.error = (e.message);
     }
-
-} catch (e) {
-    UI.err(e.message);
 }

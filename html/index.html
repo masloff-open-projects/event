@@ -15,11 +15,11 @@
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js"></script>
     <script src="/js/main.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/codemirror.min.js" integrity="sha512-H5RyE1jRbGn8d0dsSstZi0SSs23X6Hkkf5hLneEIFyCfP/cBwJ/jFJESBuFBiUyzbGZGa06tnrvw1SboRKdwcA==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/mode/javascript/javascript.min.js" integrity="sha512-9miXlEjnHTF+nVGdc2IGOLGTFW2wWkWbd1/7Ltlre+dM53ZSCUQ/PNN+jtsmYqr3ndiD5RW6XQJUm/Hz8JvyOQ==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/hint/show-hint.min.js" integrity="sha512-ge9uKCpgPmuJY2e2zPXhpYCZfyb1/R7KOOfMZ3SzSX3ZayWpINs3sHnI8LGEHUf6UOFX/D03FVHgR36uRL8/Vw==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/hint/javascript-hint.min.js" integrity="sha512-PPI9W6pViVZfJ5uvmYZsHbPwf7T+voS0OpohIrN8Q4CRCCa6JK39JJ0R16HHmyV7EQR8MTa+O56CpWjfKOxl0A==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/lint/javascript-lint.min.js" integrity="sha512-NSKMHamv0oBrbhEoC4XEPEdWjryQmaFpUHmSRbNTebEDMP1HOVUuM7KSAWtYdVeJ2qEdOOsUbKmC7pbJDM2Dpw==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/codemirror.min.js" integrity="sha512-H5RyE1jRbGn8d0dsSstZi0SSs23X6Hkkf5hLneEIFyCfP/cBwJ/jFJESBuFBiUyzbGZGa06tnrvw1SboRKdwcA==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/mode/javascript/javascript.min.js" integrity="sha512-9miXlEjnHTF+nVGdc2IGOLGTFW2wWkWbd1/7Ltlre+dM53ZSCUQ/PNN+jtsmYqr3ndiD5RW6XQJUm/Hz8JvyOQ==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/hint/show-hint.min.js" integrity="sha512-ge9uKCpgPmuJY2e2zPXhpYCZfyb1/R7KOOfMZ3SzSX3ZayWpINs3sHnI8LGEHUf6UOFX/D03FVHgR36uRL8/Vw==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/hint/javascript-hint.min.js" integrity="sha512-PPI9W6pViVZfJ5uvmYZsHbPwf7T+voS0OpohIrN8Q4CRCCa6JK39JJ0R16HHmyV7EQR8MTa+O56CpWjfKOxl0A==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/addon/lint/javascript-lint.min.js" integrity="sha512-NSKMHamv0oBrbhEoC4XEPEdWjryQmaFpUHmSRbNTebEDMP1HOVUuM7KSAWtYdVeJ2qEdOOsUbKmC7pbJDM2Dpw==" crossorigin="anonymous"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/codemirror.min.css" integrity="sha512-/BlxZbYLtYGExexketXsTi47eHp+r2kTeq2OHecQPZlfbc7WFXVrwbVW9HOYjI6c9Ti+P60ASmVLxittZ0EBGw==" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.56.0/theme/darcula.min.css" integrity="sha512-kqCOYFDdyQF4JM8RddA6rMBi9oaLdR0aEACdB95Xl1EgaBhaXMIe8T4uxmPitfq4qRmHqo+nBU2d1l+M4zUx1g==" crossorigin="anonymous" />
@@ -32,284 +32,308 @@
 </head>
 <body>
 
-    <div class="logic-error" id="primary-logic-error">
-        ...
-    </div>
+    <nav class="main">
+        <ul>
+            <li>
+                <a href="#">Main</a>
+            </li>
+        </ul>
+    </nav>
 
-    <div class="container-fluid">
-        <section class="row box">
+    <div class="ui-content" id="ui-content">
 
-            <div class="col-lg-3 col-md-4">
+        <div class="logic-error" id="primary-logic-error">
+            ...
+        </div>
 
-                <div class="cart data">
+        <div class="container-fluid">
+            <section class="row box">
 
-                    <h6>Indicators / Delta</h6>
+                <div class="col-lg-3 col-md-4">
 
-                    <div id="deltas-list">
+                    <div class="cart indicators">
+
+                        <h6>Indicators / Delta</h6>
+
+                        <table width="96%" class="deltas-list">
+
+                            <tbody id="deltas-list-body">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="cart balance">
+
+                        <h6>Balance</h6>
+
+                        <div class="value">
+                            ByBit: <span class="value" id="balance_bybit">0</span> BTC
+                        </div>
+
+                        <div class="value">
+                            Deribit: <span class="value" id="balance_deribit">0</span> BTC
+                        </div>
+
+                        <h6>PNL</h6>
+
+                        <div class="value">
+                            ByBit Total PNL: <span id="tpnl_bybit" class="">0</span> BTC / <span id="tpnl_bybit_usd" class="value">0</span> $
+                        </div>
+
+                        <div class="value">
+                            ByBit Session PNL: <span id="spnl_bybit" class="">0</span> BTC / <span id="spnl_bybit_usd" class="value">0</span> $
+                        </div>
+
+                        <div class="value">
+                            Deribit Total PNL: <span id="tpnl_deribit" class="">0</span> BTC / <span id="tpnl_deribit_usd" class="value">0</span> $
+                        </div>
+
+                        <div class="value">
+                            Deribit Session PNL: <span id="spnl_deribit" class="">0</span> BTC / <span id="spnl_deribit_usd" class="value">0</span> $
+                        </div>
+
+                    </div>
+
+                    <div class="cart users">
+
+                        <h6>Users</h6>
+
+                        <div id="users-list">
+
+                        </div>
+
+                    </div>
+
+                    <div class="cart conditions">
+
+                        <h6>Conditions</h6>
+
+                        <div id="logic-list">
+
+                        </div>
 
                     </div>
 
                 </div>
 
-                <div class="cart balance">
+                <div class="col-lg-7 col-md-8">
 
-                    <h6>Balance</h6>
+                    <div class="cart chart-cart">
 
-                    <div class="value">
-                        ByBit: <span class="value" id="balance_bybit">0</span> BTC
+                        <div id="exchange_chart">
+
+                        </div>
+
+                        <div class="bottom" id="exchange_chart_statusbar">
+                            Connecting..
+                        </div>
+
                     </div>
 
-                    <div class="value">
-                        Deribit: <span class="value" id="balance_deribit">0</span> BTC
+
+                    <div class="cart positions zerop">
+                        <div class="table-content">
+                            <table width="100%" id="positions">
+                                <thead>
+                                <tr height="24px" valign="center">
+                                    <th>Exchange</th>
+                                    <th>Instrument</th>
+                                    <th>Side</th>
+                                    <th>Size</th>
+                                    <th>Leverage</th>
+                                    <th>Margin</th>
+                                    <th>PNL</th>
+                                    <th>Fee</th>
+                                    <th>Liquidation price</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="bottom">
+                            You can see opened positions
+                        </div>
                     </div>
 
-                    <h6>PNL</h6>
 
-                    <div class="value">
-                        ByBit Total PNL: <span id="tpnl_bybit" class="">0</span> BTC / <span id="tpnl_bybit_usd" class="value">0</span> $
+                </div>
+
+                <div class="col-lg-2 col-md-12">
+
+                    <div class="cart controller">
+                        <button id="settings">Settings</button>
+                        <button id="logic">Fast Logic Editor</button>
+                        <button id="logic-editor">Logic Editor</button>
                     </div>
 
-                    <div class="value">
-                        ByBit Session PNL: <span id="spnl_bybit" class="">0</span> BTC / <span id="spnl_bybit_usd" class="value">0</span> $
+                    <div class="cart liquidation">
+
+                        <h6>Last liquidation on <b>BitMex</b> </h6>
+
+                        <div id="liquidation-list">
+
+                        </div>
+
                     </div>
 
-                    <div class="value">
-                        Deribit Total PNL: <span id="tpnl_deribit" class="">0</span> BTC / <span id="tpnl_deribit_usd" class="value">0</span> $
-                    </div>
+                    <div class="cart orders">
 
-                    <div class="value">
-                        Deribit Session PNL: <span id="spnl_deribit" class="">0</span> BTC / <span id="spnl_deribit_usd" class="value">0</span> $
+                        <h6>Orders on <b>Deribit</b></h6>
+
+                        <table width="94%" id="orders-list">
+
+                            <tbody>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp0">0</td>
+                                    <td id="bq0">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp1">0</td>
+                                    <td id="bq1">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp2">0</td>
+                                    <td id="bq2">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp3">0</td>
+                                    <td id="bq3">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp4">0</td>
+                                    <td id="bq4">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp5">0</td>
+                                    <td id="bq5">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp6">0</td>
+                                    <td id="bq6">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp7">0</td>
+                                    <td id="bq7">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp8">0</td>
+                                    <td id="bq8">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="buy" id="bp9">0</td>
+                                    <td id="bq9">0</td>
+                                </tr>
+
+                                <!--- ---->
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp0">0</td>
+                                    <td id="sq0">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp1">0</td>
+                                    <td id="sq1">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp2">0</td>
+                                    <td id="sq2">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp3">0</td>
+                                    <td id="sq3">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp4">0</td>
+                                    <td id="sq4">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp5">0</td>
+                                    <td id="sq5">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp6">0</td>
+                                    <td id="sq6">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp7">0</td>
+                                    <td id="sq7">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp8">0</td>
+                                    <td id="sq8">0</td>
+                                </tr>
+
+                                <tr width="100%">
+                                    <td width="50%" class="sell" id="sp9">0</td>
+                                    <td id="sq9">0</td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
                     </div>
 
                 </div>
 
-                <div class="cart conditions">
+            </section>
 
-                    <h6>Conditions</h6>
+            <section class="row box">
+                <div class="col-md-12">
+                    <div class="cart console">
 
-                    <div id="logic-list">
+                        <div id="console" class="console">
 
-                    </div>
+                        </div>
 
-                </div>
-
-                <div class="cart users">
-
-                    <h6>Users</h6>
-
-                    <div id="users-list">
+                        <div class="bottom" id="user-bridge">
+                            Welcome to terminal
+                        </div>
 
                     </div>
-
                 </div>
-
-            </div>
-
-            <div class="col-lg-7 col-md-8">
-
-                <div class="cart chart-cart">
-
-                    <div id="exchange_chart">
-
-                    </div>
-
-                    <div class="bottom" id="exchange_chart_statusbar">
-                        Connecting..
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-2 col-md-12">
-
-                <div class="cart controller">
-                    <button id="settings">Settings</button>
-                    <button id="logic">Fast Logic Editor</button>
-                    <button id="logic-editor">Logic Editor</button>
-                </div>
-
-                <div class="cart liquidation">
-
-                    <h6>Last liquidation on <b>BitMex</b> </h6>
-
-                    <div id="liquidation-list">
-
-                    </div>
-
-                </div>
-
-                <div class="cart orders">
-
-                    <h6>Orders on <b>Deribit</b> </h6>
-
-                    <table width="94%" id="orders-list">
-
-                       <tbody>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp0">0</td>
-                               <td id="bq0">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp1">0</td>
-                               <td id="bq1">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp2">0</td>
-                               <td id="bq2">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp3">0</td>
-                               <td id="bq3">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp4">0</td>
-                               <td id="bq4">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp5">0</td>
-                               <td id="bq5">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp6">0</td>
-                               <td id="bq6">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp7">0</td>
-                               <td id="bq7">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp8">0</td>
-                               <td id="bq8">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="buy" id="bp9">0</td>
-                               <td id="bq9">0</td>
-                           </tr>
-
-                           <!--- ---->
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp0">0</td>
-                               <td id="sq0">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp1">0</td>
-                               <td id="sq1">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp2">0</td>
-                               <td id="sq2">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp3">0</td>
-                               <td id="sq3">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp4">0</td>
-                               <td id="sq4">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp5">0</td>
-                               <td id="sq5">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp6">0</td>
-                               <td id="sq6">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp7">0</td>
-                               <td id="sq7">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp8">0</td>
-                               <td id="sq8">0</td>
-                           </tr>
-
-                           <tr width="100%">
-                               <td width="50%" class="sell" id="sp9">0</td>
-                               <td id="sq9">0</td>
-                           </tr>
+            </section>
 
 
-                       </tbody>
+        </div>
 
-                    </table>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <section class="row box">
-            <div class="col-md-12">
-                <div class="cart">
-                    <table width="100%" id="positions">
-                        <thead>
-                            <tr height="24px" valign="center">
-                                <th>Exchange</th>
-                                <th>Instrument</th>
-                                <th>Side</th>
-                                <th>Size</th>
-                                <th>Leverage</th>
-                                <th>Margin</th>
-                                <th>PNL</th>
-                                <th>Fee</th>
-                                <th>Liquidation price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section class="row box">
-            <div class="col-md-12">
-                <div class="cart console">
-
-                    <div id="console" class="console">
-
-                    </div>
-
-                    <div class="bottom" id="user-bridge">
-                        Welcome to terminal
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-
-    </div>
-
-    <div class="modal fade" tabindex="-1" role="dialog" id="logic-modal">
-       <div class="modal-area">
+        <div class="modal fade" tabindex="-1" role="dialog" id="logic-modal">
+            <div class="modal-area">
            <textarea name="" id="logic_textarea" cols="60" rows="60" height="800px">
 
            </textarea>
-       </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="ui-preloader" id="ui-preloader" style="display: none">
+        <h4>The connection is severed.</h4>
+        <p>The connection to the server was severed. Reboot the page and try again.</p>
     </div>
 
 </body>

@@ -9,3 +9,7 @@
 | {exchange}.balance.btc  | Получить стоимость BTC на бирже |
 | {exchange}.buy(price, qty)  | Открыть лонг на бирже |
 | {exchange}.sell(price, qty)  | Открыть лонг на бирже |
+
+
+Authors: 
+<div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
