@@ -2,11 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e458b85e-ce44-4fe3-a13a-5740b4433596" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/lib/bigdata.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/price-history/CURRENT" beforeDir="false" afterPath="$PROJECT_DIR$/db/price-history/CURRENT" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/price-history/LOG" beforeDir="false" afterPath="$PROJECT_DIR$/db/price-history/LOG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/price-history/LOG.old" beforeDir="false" afterPath="$PROJECT_DIR$/db/price-history/LOG.old" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/price-history/MANIFEST-000074" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/events.js" beforeDir="false" afterPath="$PROJECT_DIR$/lib/events.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/everyPrice.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/everyPrice.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/everyPriceWait.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/everyPriceWait.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/user.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,6 +73,8 @@
       <workItem from="1596358043756" duration="40118000" />
       <workItem from="1596449286048" duration="21821000" />
       <workItem from="1596477342908" duration="373000" />
+      <workItem from="1596477920159" duration="1187000" />
+      <workItem from="1596524926823" duration="6439000" />
     </task>
     <servers />
   </component>
@@ -83,14 +90,14 @@
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
     <state x="743" y="280" width="424" height="483" key="FileChooserDialogImpl/0.0.1920.1044@0.0.1920.1044" timestamp="1596194337736" />
-    <state x="565" y="136" width="790" height="772" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1596291166850">
+    <state x="565" y="136" width="790" height="772" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1596529215848">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="565" y="136" width="790" height="772" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1044@0.0.1920.1044" timestamp="1596291166850" />
-    <state x="664" y="130" width="592" height="783" key="find.popup" timestamp="1596374373108">
+    <state x="565" y="136" width="790" height="772" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1044@0.0.1920.1044" timestamp="1596529215848" />
+    <state x="664" y="130" width="592" height="783" key="find.popup" timestamp="1596529266730">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="664" y="130" width="592" height="783" key="find.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596374373108" />
+    <state x="664" y="130" width="592" height="783" key="find.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596529266730" />
     <state x="624" y="238" key="run.anything.popup" timestamp="1596392474228">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>

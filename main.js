@@ -10,6 +10,7 @@ const stream_wss_events = require('./lib/wss_events.js');
 const stream_socket = require('./lib/socket.js');
 const stream_actions = require('./lib/actions.js');
 const stream_telegram = require('./lib/telegram.js');
+const stream_data = require('./lib/data.js');
 
 const fs = require ('fs');
 const dotenv = require('dotenv');
@@ -49,6 +50,7 @@ const exchange = new stream_exchange (keypair.bybit, keypair.deribit);
 const wsse = new stream_wss_events ();
 const wss_tunnel = new stream_socket (wss, function (e) { return wsse.wss (e, wsse); })
 const a = new stream_actions ();
+const local = new stream_data ();
 const telegram = new stream_telegram (process.env.TELEGRAM_TOKEN, [
     {
         name: 'Владислав',
@@ -202,7 +204,7 @@ global.vm_context = {
             return global.data.price.bybit;
         },
         positions: () => {
-            return global.data.positions.bybit;
+            return local.get('positions/bybit');
         },
         volume: () => {
             return global.data.size.bybit;
@@ -227,7 +229,7 @@ global.vm_context = {
             return global.data.price.deribit;
         },
         positions: () => {
-            return global.data.positions.deribit;
+            return local.get('positions/deribit');
         },
         getPositions: () => {
             return exchange.positions('deribit');
@@ -255,7 +257,7 @@ global.vm_context = {
             return global.data.price.bittrex;
         },
         positions: () => {
-            return global.data.positions.bittrex;
+            return local.get('positions/bittrex');
         },
         volume: () => {
             return global.data.size.bittrex;
@@ -266,7 +268,7 @@ global.vm_context = {
             return global.data.price.bitmex;
         },
         positions: () => {
-            return global.data.positions.bitmex;
+            return local.get('positions/bitmex');
         },
         volume: () => {
             return global.data.size.bitmex;
@@ -283,7 +285,7 @@ global.big_data = {
     volumeHistory: {},
 }
 
-const e = new stream_events ();
+const e = new stream_events (local);
 
 /**
  * ByByit connect to stream
@@ -519,8 +521,8 @@ wsse.register('positions', function (e) {
 
             var response = [];
 
-            for (const position of global.data.positions.bybit) {response.push(position)}
-            for (const position of global.data.positions.deribit) {response.push(position)}
+            for (const position of local.get('positions/deribit')) {response.push(position)}
+            for (const position of local.get('positions/bybit')) {response.push(position)}
 
             resolve(response);
         })
@@ -559,6 +561,9 @@ wsse.register('volumeHistory', function (e) {
     ]);
 });
 
+/**
+ * Positions streamer
+ */
 
 setInterval(function () {
 
@@ -571,12 +576,15 @@ setInterval(function () {
          * Стандартизация ...
          */
 
+        var positions = {
+            bybit: [],
+            deribit: []
+        };
+
         if (bybit.ret_msg == 'ok') {
 
-            global.data.positions.bybit = [];
-
             for (const position of bybit.result) {
-                if (position.size > 0) {
+                if (position.size != 0) {
 
                     let data = {
                         exchange: 'ByBit',
@@ -586,53 +594,74 @@ setInterval(function () {
                         leverage: position.leverage,
                         take_profit: position.take_profit,
                         stop_loss: position.stop_loss,
-                        pnl: position.realised_pnl,
+                        pnl: position.unrealised_pnl,
                         created_at: position.created_at,
                         fee: position.occ_closing_fee,
                         margin: position.position_margin,
                         liq: position.liq_price,
                     };
-
-                    global.data.positions.bybit.push(data);
+                    positions.bybit.push(data);
                 }
             }
 
         }
 
-        // For of Deribit positions
         if ('result' in deribit) {
 
-            global.data.positions.deribit = [];
-
             for (const position of deribit.result) {
-                try {
+               if (position.size != 0) {
+                   let data = {
+                       exchange: 'Deribit',
+                       symbol: position.instrument_name,
+                       side: position.direction == 'buy' ? 'Buy' : 'Sell',
+                       size: position.size,
+                       leverage: position.leverage,
+                       take_profit: false,
+                       stop_loss: false,
+                       pnl: position.total_profit_loss,
+                       created_at: false,
+                       fee: false,
+                       margin: position.initial_margin,
+                       liq: position.estimated_liquidation_price
+                   };
 
-                    let data = {
-                        exchange: 'Deribit',
-                        symbol: position.instrument_name,
-                        side: position.direction == 'buy' ? 'Buy' : 'Sell',
-                        size: position.size,
-                        leverage: position.leverage,
-                        take_profit: false,
-                        stop_loss: false,
-                        pnl: position.total_profit_loss,
-                        created_at: false,
-                        fee: false,
-                        margin: position.initial_margin,
-                        liq: position.estimated_liquidation_price
-                    };
-
-                    global.data.positions.deribit.push(data);
-
-                } catch (e) { global.vm_context.UI.err(e.message) }
-
+                   positions.deribit.push(data);
+               }
             }
-
         }
+
+        local.set('positions/bybit', positions.bybit);
+        local.set('positions/deribit', positions.deribit);
 
     });
 
-}, 2000);
+}, 1000);
+
+
+/**
+ * Price history recorder
+ */
+
+setInterval(function (e=null) {
+
+    const time = Math.round(+new Date()/1000);
+
+    for (const e in global.data.price) {
+        let price = global.data.price[e];
+
+        for (const symbol in price) {
+            let value = price[symbol];
+
+            if (!(e in global.big_data.priceHistory)) { global.big_data.priceHistory[e] = {}; global.big_data.priceHistory[e].btc = [] }
+            if (global.big_data.priceHistory[e][symbol].length > 8000) { global.big_data.priceHistory[e][symbol].shift() }
+
+            if (value) {
+                global.big_data.priceHistory[e][symbol].push({time: time, value: value});
+            }
+        }
+
+    }
+}, 1000);
 
 
 /**
