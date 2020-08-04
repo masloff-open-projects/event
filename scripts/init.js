@@ -1,6 +1,7 @@
 var global = {
     main: 0,
-    init: 1
+    init: 1,
+    oldPrice: 0
 };
 
 class __ {

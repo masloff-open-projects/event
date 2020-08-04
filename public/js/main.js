@@ -1,246 +1,229 @@
-(function (e) {
+$(document).ready(function() {
 
-    $(document).ready(function() {
+    $('#logic-modal').on('show.bs.modal', function (e) {
+        setTimeout(function(){
+            if (!('logic_editor' in window)) {
 
-        $('#logic-modal').on('show.bs.modal', function (e) {
-            setTimeout(function(){
-                if (!('logic_editor' in window)) {
+                $.get("/get/script/user", function(data) {
+                    $("#logic_textarea").text(data);
 
-                    $.get("/get/script/user", function(data) {
-                        $("#logic_textarea").text(data);
+                    window.logic_editor = CodeMirror.fromTextArea(logic_textarea, {
+                        lineNumbers: true,
+                        styleActiveLine: true,
+                        matchBrackets: true,
+                        mode: "text/javascript",
+                        // keyMap: "sublime",
+                        theme: 'darcula',
+                        autoCloseTags: true,
+                        lineWrapping: true,
+                        extraKeys: {
+                            "Ctrl-R": function() {
+                                // do something
+                            },
+                            "Ctrl-S": function() {
 
-                        window.logic_editor = CodeMirror.fromTextArea(logic_textarea, {
-                            lineNumbers: true,
-                            styleActiveLine: true,
-                            matchBrackets: true,
-                            mode: "text/javascript",
-                            // keyMap: "sublime",
-                            theme: 'darcula',
-                            autoCloseTags: true,
-                            lineWrapping: true,
-                            extraKeys: {
-                                "Ctrl-R": function() {
-                                    // do something
-                                },
-                                "Ctrl-S": function() {
+                                $.post("/set/script/user", {
+                                    code: window.logic_editor.getValue()
+                                }, function(data) {
+                                    alert('Saved!');
+                                });
 
-                                    $.post("/set/script/user", {
-                                        code: window.logic_editor.getValue()
-                                    }, function(data) {
-                                        alert('Saved!');
-                                    });
-
-                                },
-                                "Ctrl": "autocomplete"
-                            }
-                        });
-                        window.logic_editor.on("keyup", function (cm, event) {
-                            if (event.keyCode != 13 && event.keyCode != 39 && event.keyCode != 37 && event.keyCode != 8 && !cm.state.completionActive) {
-                                clearTimeout(window.cm_autocomplite);
-                                window.cm_autocomplite = setTimeout(function () {
-                                    CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
-                                }, 1550);
-
-                            } else if (event.keyCode == 13 || event.keyCode == 8) {
-                                clearTimeout(window.cm_autocomplite);
-                            }
-                        });
+                            },
+                            "Ctrl": "autocomplete"
+                        }
                     });
+                    window.logic_editor.on("keyup", function (cm, event) {
+                        if (event.keyCode != 13 && event.keyCode != 39 && event.keyCode != 37 && event.keyCode != 8 && !cm.state.completionActive) {
+                            clearTimeout(window.cm_autocomplite);
+                            window.cm_autocomplite = setTimeout(function () {
+                                CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+                            }, 1550);
 
+                        } else if (event.keyCode == 13 || event.keyCode == 8) {
+                            clearTimeout(window.cm_autocomplite);
+                        }
+                    });
+                });
+
+            }
+        }, 300);
+    });
+
+    $('#logic').click(function () { $('#logic-modal').modal(); });
+    $('#logic-editor').click(function () { window.open("/code", "", "width=800,height=600"); });
+
+    $(`[data-action="changeLineShow"]`).change(function(e) {
+        let lineId = $(this).attr('data-line');
+        localStorage.setItem(`lineShow-${lineId}`, (this.value == "true" || this.value == true) ? true : false);
+        window.chart_object.applyOptions({});
+    });
+
+    for (const element of $(`[data-action="changeLineShow"]`)) {
+        let lineId = $(element).attr('data-line');
+        let value = localStorage.getItem(`lineShow-${lineId}`) === null ? "true" : localStorage.getItem(`lineShow-${lineId}`);
+        $(element).val(value);
+    }
+
+    window.chart_object = LightweightCharts.createChart(exchange_chart, {
+        height: $(document).height() / 1.5,
+        rightPriceScale: {
+            scaleMargins: {
+                top: 0.3,
+                bottom: 0.25,
+            },
+            borderVisible: true,
+        },
+        layout: {
+            backgroundColor: '#232323',
+            textColor: '#ffffff',
+        },
+        grid: {
+            vertLines: {
+                color: '#3e3e3e',
+            },
+            horzLines: {
+                color: '#3e3e3e',
+            },
+        },
+    });
+    window.chart = {
+        bybit: window.chart_object.addAreaSeries({
+            topColor: 'rgba(229, 171, 97, 0.56)',
+            bottomColor: 'rgba(229, 171, 97, 0.04)',
+            lineColor: 'rgba(229, 171, 97, 1)',
+            lineWidth: 1,
+        }),
+        deribit: window.chart_object.addAreaSeries({
+            topColor: 'rgba(32, 197, 173, 0.56)',
+            bottomColor: 'rgba(32, 197, 173, 0.04)',
+            lineColor: 'rgba(32, 197, 173, 1)',
+            lineWidth: 1,
+        }),
+        bittrex: window.chart_object.addAreaSeries({
+            topColor: 'rgba(20, 93, 255, 0.56)',
+            bottomColor: 'rgba(20, 93, 255, 0.04)',
+            lineColor: 'rgba(20, 93, 255, 1)',
+            lineWidth: 1,
+        }),
+        bitmex: window.chart_object.addAreaSeries({
+            topColor: 'rgba(241, 79, 76, 0.56)',
+            bottomColor: 'rgba(241, 79, 76, 0.04)',
+            lineColor: 'rgba(241, 79, 76, 1)',
+            lineWidth: 1,
+        }),
+        volume: window.chart_object.addHistogramSeries({
+            color: '#26a69a',
+            priceFormat: {
+                type: 'volume',
+            },
+            priceScaleId: '',
+            scaleMargins: {
+                top: 0.8,
+                bottom: 0,
+            },
+        })
+    }
+
+    $.contextMenu({
+        selector: '.exchange-position',
+        callback: function(key, options) {
+
+            if (key == 'close') {
+                let exchange = $(this).attr('data-exchange');
+                let size = $(this).attr('data-size');
+                let side = $(this).attr('data-side');
+                let symbol = $(this).attr('data-symbol');
+
+                if (prompt('If you want close position, please type `Close`:') == 'Close') {
+                    wss_stream.send('openMarketPosition', {
+                        exchange: exchange.toLocaleLowerCase(),
+                        size: Math.abs(size),
+                        side: side == 'Buy' ? 'Sell' : 'Buy',
+                        symbol: symbol
+                    });
                 }
-            }, 300);
-        });
+            }
 
-        $('#logic').click(function () { $('#logic-modal').modal(); });
-        $('#logic-editor').click(function () { window.open("/code", "", "width=800,height=600"); });
-
-        window.chart_object = LightweightCharts.createChart(exchange_chart, {
-            height: $(document).height() / 1.5,
-            rightPriceScale: {
-                scaleMargins: {
-                    top: 0.3,
-                    bottom: 0.25,
-                },
-                borderVisible: true,
-            },
-            layout: {
-                backgroundColor: '#232323',
-                textColor: '#ffffff',
-            },
-            grid: {
-                vertLines: {
-                    color: '#3e3e3e',
-                },
-                horzLines: {
-                    color: '#3e3e3e',
-                },
-            },
-        });
-        window.chart = {
-            bybit: window.chart_object.addAreaSeries({
-                topColor: 'rgba(229, 171, 97, 0.56)',
-                bottomColor: 'rgba(229, 171, 97, 0.04)',
-                lineColor: 'rgba(229, 171, 97, 1)',
-                lineWidth: 1,
-            }),
-            deribit: window.chart_object.addAreaSeries({
-                topColor: 'rgba(32, 197, 173, 0.56)',
-                bottomColor: 'rgba(32, 197, 173, 0.04)',
-                lineColor: 'rgba(32, 197, 173, 1)',
-                lineWidth: 1,
-            }),
-            bittrex: window.chart_object.addAreaSeries({
-                topColor: 'rgba(20, 93, 255, 0.56)',
-                bottomColor: 'rgba(20, 93, 255, 0.04)',
-                lineColor: 'rgba(20, 93, 255, 1)',
-                lineWidth: 1,
-            }),
-            bitmex: window.chart_object.addAreaSeries({
-                topColor: 'rgba(241, 79, 76, 0.56)',
-                bottomColor: 'rgba(241, 79, 76, 0.04)',
-                lineColor: 'rgba(241, 79, 76, 1)',
-                lineWidth: 1,
-            }),
-            volume: window.chart_object.addHistogramSeries({
-                color: '#26a69a',
-                priceFormat: {
-                    type: 'volume',
-                },
-                priceScaleId: '',
-                scaleMargins: {
-                    top: 0.8,
-                    bottom: 0,
-                },
-            })
+        },
+        items: {
+            "close": {name: "Close", icon: "close"},
         }
-
     });
 
-    $(window).resize(function() {
+    $.contextMenu({
+        selector: '.user-connection-controller',
+        callback: function(key, options) {
 
-        if ('chart_object' in window) {
+            if (key == 'disconnect') {
+                wss_stream.send('disconnectIP', {
+                    ip: $(this).attr('data-ip')
+                });
+            }
 
-            const chart_height = $(document).height() / 1.5;
-            const chart_width = $("#exchange_chart").width();
-
-            window.chart_object.applyOptions({ width: chart_width, height: chart_height })
-
+        },
+        items: {
+            "disconnect": {name: "Disconnect", icon: "disconnect"},
         }
-
     });
 
-})($);
+});
 
+$(document).resize(function() {
+    if ('chart_object' in window) {
+
+        const chart_height = $(document).height() / 1.5;
+        const chart_width = $("#exchange_chart").width();
+
+        window.chart_object.applyOptions({ width: chart_width, height: chart_height })
+
+    }
+});
+
+wss_stream.on ('actions', function (e=null) {
+    return {
+        'balance': {},
+        'indicators': {},
+        'conditions': {},
+        'positions': {},
+        'ordersBook': {
+            symbol: 'BTC',
+            exchange: 'bitmex'
+        },
+        'price': {},
+        'console': {},
+        'users': {},
+        'connections': {},
+        'liquidations': {},
+        'priceHistory': {
+            bybit: localStorage.getItem(`lineShow-bybit`) === null ? true : localStorage.getItem(`lineShow-bybit`),
+            deribit: localStorage.getItem(`lineShow-deribit`) === null ? true : localStorage.getItem(`lineShow-deribit`),
+            bittrex: localStorage.getItem(`lineShow-bittrex`) === null ? true : localStorage.getItem(`lineShow-bittrex`),
+            bitmex: localStorage.getItem(`lineShow-bitmex`) === null ? true : localStorage.getItem(`lineShow-bitmex`),
+        },
+        'volumeHistory': {},
+    }
+});
+
+wss_stream.on ('open', function (e=null) {
+    for (const action in wss_stream.call('actions')) {
+        let data = wss_stream.call('actions')[action];
+        wss_stream.send(action, data);
+    }
+
+    setInterval(function (e=null) {
+        wss_stream.send('balance', wss_stream.call('actions').balance);
+    }, 8000);
+})
+
+wss_stream.on ('error', function (e=null) {
+    $('#ui-preloader').css('display', '');
+})
+
+wss_stream.on ('close', function (e=null) {
+    $('#ui-preloader').css('display', '');
+})
 
 $(document).ready(function (e) {
-
-    class chart {
-
-        constructor(max=60000) {
-            this.chart = {}
-            this.settings = {
-                max: max
-            }
-        }
-
-        append (chart="default", data={}) {
-            if (!( chart in this.chart )) { this.chart[chart] = []; }
-            this.chart[chart].push(data)
-            if (this.chart[chart].length > this.settings.max){  this.chart[chart].shift() }
-        }
-
-        get (chart="default") {
-            if (chart in this.chart) {
-                return this.chart[chart];
-            } else { return []; }
-        }
-
-        set (chart="default", data={}) {
-            this.chart[chart] = data;
-        }
-
-    }
-    class wstream {
-
-        constructor(wss={}) {
-            this.actions = {};
-            this.wss = wss;
-        }
-
-        register (action="default", callback={}) {
-            if (!(action in this.actions)) {
-                this.actions[action] = callback;
-                return true;
-            }
-            return false;
-        }
-
-        ws (action='default', data={}) {
-            if (action in this.actions) {
-                return this.actions[action](data);
-            }
-            return false;
-        }
-
-        send (action="default", data={}) {
-            this.wss.send(JSON.stringify({
-                action: action,
-                data: data
-            }));
-        }
-
-    }
-
-    const io = new WebSocket(`${location.protocol == 'http:' ? 'ws' : 'wss'}://${location.host}`);
-    const wss_stream = new wstream(io);
-    const charter = new chart(3000);
-
-    io.onerror = function (event) {
-        if (io.readyState !== io.OPEN) {
-            $('#ui-preloader').css('display', '');
-        }
-    }
-
-    io.onopen = function (event) {
-
-        io.send(JSON.stringify({action: 'balance'}));
-        io.send(JSON.stringify({action: 'indicators'}));
-        io.send(JSON.stringify({action: 'conditions'}));
-        io.send(JSON.stringify({action: 'positions'}));
-        io.send(JSON.stringify({action: 'orders'}));
-        io.send(JSON.stringify({action: 'price'}));
-        io.send(JSON.stringify({action: 'console'}));
-        io.send(JSON.stringify({action: 'users'}));
-        io.send(JSON.stringify({action: 'connections'}));
-        io.send(JSON.stringify({action: 'liquidations'}));
-        io.send(JSON.stringify({action: 'priceHistory'}));
-        io.send(JSON.stringify({action: 'volumeHistory'}));
-
-
-        setInterval(function() {
-            if (io.readyState === io.OPEN) {
-                io.send(JSON.stringify({action: 'price'}));
-                io.send(JSON.stringify({action: 'balance'}));
-            } else {
-                $('#ui-preloader').css('display', '');
-            }
-        }, 8000);
-
-    }
-
-    io.onmessage = function (event) {
-        if (io.readyState === io.OPEN) {
-            const response = JSON.parse(event.data);
-            wss_stream.ws(response.action, response.data)   
-        } else {
-            $('#ui-preloader').css('display', '');
-        }
-    }
-
-
-    /**
-     * Получаем цены всех бирж
-     */
 
     wss_stream.register('price', function (e=null) {
         if (typeof e == typeof []) {
@@ -252,13 +235,8 @@ $(document).ready(function (e) {
 
         }
 
-        wss_stream.send('price');
+        wss_stream.send('price', wss_stream.call('actions').price);
     });
-
-
-    /**
-     * Получаем объемы
-     */
 
     wss_stream.register('volumeHistory', function (e=null) {
         if (typeof e == typeof []) {
@@ -266,30 +244,19 @@ $(document).ready(function (e) {
             window.chart.volume.setData(volumes.deribit.btc);
         }
 
-        wss_stream.send('volumeHistory');
+        wss_stream.send('volumeHistory', wss_stream.call('actions').volumeHistory);
     });
-
-
-    /**
-     * Получяем всех пользователей, которые используют сокет соеденение.
-     * Получаем всех активных пользователей в сети.
-     */
 
     wss_stream.register('connections', function (e=null) {
         if (typeof e[0] == typeof []) {
             $("#users-list").text('');
             for (const device of e[0]) {
-                $("#users-list").append(`<div class="user"> <i class="fa fa-circle user-online-indicator" aria-hidden="true"></i> <b>${'0'}</b>: ${device.ip}</div>`);
+                $("#users-list").append(`<div class="user user-connection-controller" data-ip="${device.ip}"> <i class="fa fa-circle user-online-indicator" aria-hidden="true"></i> <b>${'Anonim'}</b>: ${device.ip}</div>`);
             }
         }
 
-        wss_stream.send('connections');
+        wss_stream.send('connections', wss_stream.call('actions').connections);
     });
-
-
-    /**
-     * Получаем балансы всех бирж
-     */
 
     wss_stream.register('balance', function (e=null) {
         if (typeof e == typeof []) {
@@ -336,12 +303,8 @@ $(document).ready(function (e) {
             if (deribit_spnl > 0) { $('#spnl_deribit').addClass("pnl-up"); } else { $('#spnl_deribit').addClass("pnl-down"); }
 
         }
+
     });
-
-
-    /**
-     * Получаем данные консоли
-     */
 
     wss_stream.register('console', function (e=null) {
         if (typeof e == typeof []) {
@@ -410,19 +373,14 @@ $(document).ready(function (e) {
              * Маркируем терминал
              */
 
-            if (chart.markers.length > 0) {
-                charter.set('exchange/markers', Object.assign(charter.get('exchange/markers'), chart.markers));
-            }
+            // if (chart.markers.length > 0) {
+            //     charter.set('exchange/markers', Object.assign(charter.get('exchange/markers'), chart.markers));
+            // }
 
-            wss_stream.send('console');
+            wss_stream.send('console', wss_stream.call('actions').console);
 
         }
     });
-
-
-    /**
-     * Получаем данные индикаторов
-     */
 
     wss_stream.register('indicators', function (e=null) {
         if (typeof e == typeof []) {
@@ -448,48 +406,36 @@ $(document).ready(function (e) {
                 }
             }
 
-            wss_stream.send('indicators');
-
+            wss_stream.send('indicators', wss_stream.call('actions').indicators);
         }
     });
-
-
-    /**
-     * Получаем данные позиций
-     */
 
     wss_stream.register('positions', function (e=null) {
         if (typeof e == typeof []) {
 
             let positions = e[0];
 
-            $(`table#positions > tbody`).html("");
+            $(`table#positions > tbody`).html('');
 
             for (const position of positions) {
 
-                $(`table#positions > tbody`).append(`<tr height="32px" valign="center">
-                    <td><b>${position.exchange}</b></td>
-                    <td>${position.symbol ? position.symbol : '0'}</td>
-                    <td>${position.side == 'Buy' ? `<span class='marker-buy'> <i class="fa fa-sort-up" aria-hidden="true"></i> Buy</span>` : `<span class='marker-sell'> <i class="fa fa-sort-down" aria-hidden="true"></i> Sell</span>`}</td>
-                    <td>${position.size ? (position.size).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : '0'} USD</td>
-                    <td>${position.leverage ? position.leverage : '0'}</td>
-                    <td>${position.margin ? parseFloat(position.margin).toFixed(6) : '0'}</td>
-                    <td><span class="${position.pnl > 0 ? 'pnl-up' : 'pnl-down'}">${position.pnl ? parseFloat(position.pnl).toFixed(6) : '0'}</span> BTC</td>
-                    <td>${position.fee ? position.fee : '0'}</td>
-                    <td>${position.liq ? position.liq : '0'}</td>
-                </tr>`);
+                $(`table#positions > tbody`).append(`<tr height="48px" valign="center" class="exchange-position" data-exchange="${position.exchange}" data-symbol="${position.symbol}" data-side="${position.side}" data-size="${position.size}">
+                        <td><b>${position.exchange}</b></td>
+                        <td>${position.symbol ? position.symbol : '0'}</td>
+                        <td>${position.side == 'Buy' ? `<span class='marker-buy'> <i class="fa fa-sort-up" aria-hidden="true"></i> Buy</span>` : `<span class='marker-sell'> <i class="fa fa-sort-down" aria-hidden="true"></i> Sell</span>`}</td>
+                        <td>${position.size ? (position.size).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : '0'} USD</td>
+                        <td>${position.leverage ? position.leverage : '0'}</td>
+                        <td>${position.margin ? parseFloat(position.margin).toFixed(6) : '0'}</td>
+                        <td><span class="${position.pnl > 0 ? 'pnl-up' : 'pnl-down'}">${position.pnl ? parseFloat(position.pnl).toFixed(6) : '0'}</span> BTC</td>
+                        <td>${position.fee ? position.fee : '0'}</td>
+                        <td>${position.liq ? position.liq : '0'}</td>
+                    </tr>`);
 
             }
 
-            wss_stream.send('positions');
-
+            wss_stream.send('positions', wss_stream.call('actions').positions);
         }
     });
-
-
-    /**
-     * Получаем данные ликвидаций
-     */
 
     wss_stream.register('liquidations', function (e=null) {
         if (typeof e == typeof []) {
@@ -500,42 +446,51 @@ $(document).ready(function (e) {
                 $("#liquidation-list").html(`<div class="item ${liquidations.size == 'Sell' ? 'sell' : 'buy' }"> <span>BTC</span> <b class="value">${liquidations.leavesQty}</b> </div>`);
             }
 
-            wss_stream.send('liquidations');
-
+            wss_stream.send('liquidations', wss_stream.call('actions').liquidations);
         }
     });
 
-
-    /**
-     * Получаем данные ордеров
-     */
-
-    wss_stream.register('orders', function (e=null) {
+    wss_stream.register('ordersBook', function (e=null) {
         if (typeof e == typeof []) {
 
             let orders = e[0];
 
-            for (let i = 0; i < 10; i++) {
-                $(`#bp${i}`).text(orders.bitmex.bids[i][0]);
-                $(`#bq${i}`).text(orders.bitmex.bids[i][1]);
-                $(`#bp${i}`).css('width', `${(orders.bitmex.bids[i][1] / 60000) < 50 ? orders.bitmex.bids[i][1] / 60000 : 50}%`)
+            if (orders) {
+
+                // Bids
+                for (let i = 0; i < 10; i++) {
+
+                    var delta = (orders.bids[i][1]/800000)*100;
+                        delta = delta > 64 ? 64 : delta;
+                        delta = delta < 10 ? 10 : delta;
+
+                    $(`#bp${i}`).text(orders.bids[i][0]);
+                    $(`#bq${i}`).text(orders.bids[i][1]);
+                    $(`#bp${i}`).css('width', `${delta}%`);
+                    $(`#bp${i}`).css('background', `rgba(71, 93, 47, ${delta * 0.05})`);
+
+                }
+
+
+                // Asks
+                for (let i = 0; i < 10; i++) {
+
+                    var delta = (orders.asks[i][1]/800000)*100;
+                        delta = delta > 64 ? 64 : delta;
+                        delta = delta < 10 ? 10 : delta;
+
+                    $(`#sp${i}`).text(orders.asks[i][0]);
+                    $(`#sq${i}`).text(orders.asks[i][1]);
+                    $(`#sp${i}`).css('width', `${delta}%`);
+                    $(`#sp${i}`).css('background', `rgba(117, 52, 51, ${delta * 0.05})`);
+
+                }
             }
 
-            for (let i = 0; i < 10; i++) {
-                $(`#sp${i}`).text(orders.bitmex.asks[i][0]);
-                $(`#sq${i}`).text(orders.bitmex.asks[i][1]);
-                $(`#sp${i}`).css('width', `${(orders.bitmex.asks[i][1] / 60000) < 50 ? orders.bitmex.asks[i][1] / 60000 : 50}%`)
-            }
-
-            wss_stream.send('orders');
+            wss_stream.send('ordersBook', wss_stream.call('actions').ordersBook);
 
         }
     });
-
-
-    /**
-     * Получаем данные истории цен
-     */
 
     wss_stream.register('priceHistory', function (e=null) {
         if (typeof e == typeof []) {
@@ -547,16 +502,14 @@ $(document).ready(function (e) {
             if ('bittrex' in priceHistory) { window.chart.bittrex.setData(priceHistory.bittrex.btc); }
             if ('bitmex' in priceHistory) { window.chart.bitmex.setData(priceHistory.bitmex.btc); }
 
-            window.chart.bybit.setMarkers(charter.get('exchange/markers'));
+            // window.chart.bybit.setMarkers(charter.get('exchange/markers'));
 
             $("#exchange_chart_statusbar").text(`Connected!`);
 
-            wss_stream.send('priceHistory');
+            wss_stream.send('priceHistory', wss_stream.call('actions').priceHistory);
 
         }
     });
-
-
 
 });
 

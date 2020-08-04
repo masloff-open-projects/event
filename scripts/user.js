@@ -1,5 +1,6 @@
  function everyPrice () {
- 	UI.set(bybit.positions()[0].size);
+ 	UI.set(indicators.SMA());
+   //deribit.sell();
  }
 //
 // function everyPriceWait() {

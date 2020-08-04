@@ -1,3 +1,7 @@
+/**
+ * Code execute on ever price get
+ */
+
 if (typeof everyPrice === "function") {
     try {
         everyPrice ();

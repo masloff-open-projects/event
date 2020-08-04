@@ -12,9 +12,21 @@ html, body {
     color: #ffffff;
 }
 
+a {
+    color: #145DFF;
+}
+
+select {
+    color: white;
+    background: #232222;
+    padding: 4px;
+    font-size: 12px;
+    border: 1px solid #525252;
+}
+
 div.ui-preloader > h4 {
     font-width: bold;
-    font-size: 24px;
+    font-size: 26px;
 }
 
 div.ui-preloader {
@@ -23,15 +35,37 @@ div.ui-preloader {
 
     height: 100%;
     width: 100%;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
     display: flex;
+    -webkit-align-content: center;
+    -ms-flex-line-pack: center;
     align-content: center;
     position: fixed;
     left: 0;
     top: 0;
+    -ms-grid-row-align: center;
+    -ms-grid-column-align: center;
     place-self: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
     align-items: center;
     text-align: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -moz-box-pack: center;
+    -ms-flex-pack: center;
     justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-flow: column;
+    -moz-box-orient: vertical;
+    -moz-box-direction: normal;
+    -ms-flex-flow: column;
     flex-flow: column;
 
     background: rgb(35,35,35);
@@ -85,6 +119,13 @@ div.cart > div.bottom{
     background: #1f1d1d;
     padding: 6px 8px;
     border-top: 1px solid #525252;
+    font-size: 14px;
+}
+
+div.cart > div.top{
+    background: #232222;
+    padding: 6px 8px;
+    border-bottom: 1px solid #525252;
     font-size: 14px;
 }
 
@@ -151,7 +192,10 @@ div.cart + .orders > #orders-list > tbody > tr > td:last-child {
 }
 
 div.cart + .orders > #orders-list > tbody > tr > td:first-child {
-   float: left;
+    float: left;
+    -webkit-transition: 0.6s;
+    -o-transition: 0.6s;
+    -moz-transition: 0.6s;
     transition: 0.6s;
 }
 
@@ -200,6 +244,8 @@ div.cart + .orders > #orders-list > div.sell > span.qty {
 div.cart + .liquidation > #liquidation-list > div.item {
     margin: 12px 8px;
     padding: 4px 8px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
     border-radius: 4px;
 }
 
@@ -208,6 +254,10 @@ div.cart + .liquidation > #liquidation-list > div.buy {
     background: rgb(35,35,35);
     background: -moz-linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(114,163,63,1) 90%, rgba(93,129,55,1) 100%);
     background: -webkit-linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(114,163,63,1) 90%, rgba(93,129,55,1) 100%);
+    background: -webkit-gradient(linear, left top, right top, from(rgba(35,35,35,1)), color-stop(42%, rgba(35,35,35,1)), color-stop(90%, rgba(114,163,63,1)), to(rgba(93,129,55,1)));
+    background: -webkit-linear-gradient(left, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(114,163,63,1) 90%, rgba(93,129,55,1) 100%);
+    background: -moz-linear-gradient(left, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(114,163,63,1) 90%, rgba(93,129,55,1) 100%);
+    background: -o-linear-gradient(left, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(114,163,63,1) 90%, rgba(93,129,55,1) 100%);
     background: linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(114,163,63,1) 90%, rgba(93,129,55,1) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#232323",endColorstr="#5d8137",GradientType=1);
 
@@ -218,6 +268,10 @@ div.cart + .liquidation > #liquidation-list > div.sell {
     background: rgb(35,35,35);
     background: -moz-linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(241,79,76,1) 90%, rgba(199,60,57,1) 100%);
     background: -webkit-linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(241,79,76,1) 90%, rgba(199,60,57,1) 100%);
+    background: -webkit-gradient(linear, left top, right top, from(rgba(35,35,35,1)), color-stop(42%, rgba(35,35,35,1)), color-stop(90%, rgba(241,79,76,1)), to(rgba(199,60,57,1)));
+    background: -webkit-linear-gradient(left, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(241,79,76,1) 90%, rgba(199,60,57,1) 100%);
+    background: -moz-linear-gradient(left, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(241,79,76,1) 90%, rgba(199,60,57,1) 100%);
+    background: -o-linear-gradient(left, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(241,79,76,1) 90%, rgba(199,60,57,1) 100%);
     background: linear-gradient(90deg, rgba(35,35,35,1) 0%, rgba(35,35,35,1) 42%, rgba(241,79,76,1) 90%, rgba(199,60,57,1) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#232323",endColorstr="#c73c39",GradientType=1);
 
@@ -456,6 +510,28 @@ div.indicators > .deltas-list {
     margin: 4px 8px;
 }
 
+button.primary-button {
+    background: transparent;
+    border: 1px solid #323232;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+button.close-button {
+    background-color: rgba(241, 77, 63, 0.2);
+    border: 1px solid rgba(241, 77, 63, 0.6);
+    padding: 4px 10px;
+    color: rgba(241, 77, 63, 1);
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'Roboto';
+    font-width: bold;
+}
+
 div.indicators  > h6 {
     padding: 4px 8px;
     margin: 4px 0px;
@@ -469,6 +545,9 @@ div.indicators > .deltas-list > tbody > tr > td:last-child {
 
 div.indicators > .deltas-list > tbody > tr > td:first-child {
     float: left;
+    -webkit-transition: 0.6s;
+    -o-transition: 0.6s;
+    -moz-transition: 0.6s;
     transition: 0.6s;
 }
 

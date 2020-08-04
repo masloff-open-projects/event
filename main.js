@@ -11,6 +11,8 @@ const stream_socket = require('./lib/socket.js');
 const stream_actions = require('./lib/actions.js');
 const stream_telegram = require('./lib/telegram.js');
 const stream_data = require('./lib/data.js');
+const stream_indicators = require('./lib/indicators.js');
+const stream_csv = require('./lib/csv.js');
 
 const fs = require ('fs');
 const dotenv = require('dotenv');
@@ -21,11 +23,6 @@ const basicAuth = require('express-basic-auth');
 const bodyParser = require('body-parser');
 const WebSocketServer = require('websocket').server;
 const BitMEXClient = require('bitmex-realtime-api');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-const csvPositions = createCsvWriter({
-    path: 'db/positions.csv',
-    header: ['exchange', 'side', 'size']
-});
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({httpServer: server});
@@ -51,6 +48,8 @@ const wsse = new stream_wss_events ();
 const wss_tunnel = new stream_socket (wss, function (e) { return wsse.wss (e, wsse); })
 const a = new stream_actions ();
 const local = new stream_data ();
+const csv = new stream_csv ();
+const indicators = new stream_indicators ();
 const telegram = new stream_telegram (process.env.TELEGRAM_TOKEN, [
     {
         name: 'Владислав',
@@ -66,6 +65,7 @@ const bmc = new BitMEXClient({testnet: !process.env.TESTNET});
 app.use(basicAuth({users: {'trader': 'QmHLY3IlrEkRgR82', 'root': 'root'}, challenge: true, realm: 'Imb4T3st4pp'}));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + '/public'));
+
 
 global.data = {
     price: {
@@ -96,14 +96,6 @@ global.data = {
             btc: 0
         }
     },
-    positions: {
-        bybit: [],
-        deribit: [],
-        bitmex: [],
-        bittrex: []
-    },
-    indicators: {
-    },
     book: {
         bitmex: {
             bids: [],
@@ -115,7 +107,6 @@ global.data = {
     }
 }
 global.vm_context = {
-    env: process.env,
     UI: {
         text: "",
         error: "",
@@ -151,33 +142,10 @@ global.vm_context = {
             }
         }
     },
-    "$": {
-        _: {
-            wait: false
-        },
-        sleep: function (ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        },
-        wait: function (ms) {
-            const date = Date.now();
-            let currentDate = null;
-            do {
-                currentDate = Date.now();
-            } while (currentDate - date < ms);
-        },
-        mwait: function (ms, callback) {
-           if ('mwait_session' in global && global.mwait_session) {
-
-           } else {
-               callback();
-               global.mwait_session = true;
-               setTimeout(function (){
-                   global.mwait_session = false
-               }, ms);
-           }
-        }
-    },
     telegram: telegram,
+    env: (e) => {
+        return (e in process.env ? process.env[e] : false);
+    },
     len: (e) => {
         return (e ? e : []).length;
     },
@@ -192,9 +160,7 @@ global.vm_context = {
 
         return false;
     },
-    indicators: function () {
-        return global.data.indicators;
-    },
+    indicators: indicators,
     time: function () { parseInt(new Date().getTime()/1000) },
     data: function () {
         return global.data;
@@ -335,10 +301,8 @@ const e = new stream_events (local);
 
 (function (e=null) {
 
-    /**
-     * Get price form Deribit
-     */
 
+    //Get price form Deribit
     stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
         "jsonrpc": "2.0",
         "method": "public/get_index",
@@ -354,10 +318,7 @@ const e = new stream_events (local);
     }, true);
 
 
-    /**
-     * Get volumes from Deribit
-     */
-
+    // Get volumes from Deribit
     stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
         "jsonrpc" : "2.0",
         "id" : 9290,
@@ -510,7 +471,7 @@ wsse.register('console', function (e) {
 wsse.register('indicators', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
-            resolve(global.data.indicators);
+            resolve(indicators.delta());
         })
     ]);
 });
@@ -521,8 +482,8 @@ wsse.register('positions', function (e) {
 
             var response = [];
 
-            for (const position of local.get('positions/deribit')) {response.push(position)}
-            for (const position of local.get('positions/bybit')) {response.push(position)}
+            for (const position of (local.get('positions/deribit') ? local.get('positions/deribit') : [{}])) {response.push(position)}
+            for (const position of (local.get('positions/bybit') ? local.get('positions/bybit') : [{}])) {response.push(position)}
 
             resolve(response);
         })
@@ -537,10 +498,10 @@ wsse.register('liquidations', function (e) {
     ]);
 });
 
-wsse.register('orders', function (e) {
+wsse.register('ordersBook', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
-            resolve(global.data.book)
+            resolve(local.get(`book/${e.data.exchange}/${e.data.symbol}`))
         })
     ]);
 });
@@ -548,7 +509,18 @@ wsse.register('orders', function (e) {
 wsse.register('priceHistory', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
-            resolve(global.big_data.priceHistory)
+
+            if ('data' in e && e.data) {
+                var returnData = {};
+                for (const exchange in e.data) {
+                    if (e.data[exchange] != false && e.data[exchange] != "false") {
+                        returnData[exchange] = exchange in global.big_data.priceHistory ? global.big_data.priceHistory[exchange] : []
+                    }
+                }
+                resolve(returnData);
+            } else {
+                resolve(global.big_data.priceHistory);
+            }
         })
     ]);
 });
@@ -557,6 +529,23 @@ wsse.register('volumeHistory', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
             resolve(global.big_data.volumeHistory)
+        })
+    ]);
+});
+
+wsse.register('openMarketPosition', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+            let data = e.data;
+            resolve(exchange.market(data.exchange, data.side, data.symbol, data.size))
+        })
+    ]);
+});
+
+wsse.register('disconnectIP', function (e) {
+    return Promise.all([
+        new Promise((resolve, reject) => {
+            resolve(wss_tunnel.disconnect(e.data.ip))
         })
     ]);
 });
@@ -635,7 +624,7 @@ setInterval(function () {
 
     });
 
-}, 1000);
+}, 1900);
 
 
 /**
@@ -662,6 +651,33 @@ setInterval(function (e=null) {
 
     }
 }, 1000);
+
+
+/**
+ * Deltas recorder
+ */
+
+setInterval(function (e=null) {
+
+    var delta = indicators.delta();
+    for (const e_ in delta) {
+        for (const e__ in delta[e_]) {
+            if (e__ != e_) {
+                let value = delta[e_][e__];
+
+                for (const type in value) {
+                    if (typeof value[type] == typeof "" || typeof value[type] == typeof 0 || typeof value[type] == typeof 0.0) {
+                        csv.open(`db/indicators_${e__}_${e_}_${type}.csv`);
+                        csv.write([
+                            value.delta
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+}, 1000)
 
 
 /**
