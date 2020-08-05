@@ -1,4 +1,4 @@
-<img src="https://i.ibb.co/W0hHFw7/Event-banner.jpg" alt="Event-banner" border="0" width="100%">
+<img src="https://svgshare.com/i/NWh.svg" alt="Event-banner" border="0" width="100%">
 
 # Документация по работе с терминалом Event
 Терминал Event умеет воспроизводить пользовательский код.
