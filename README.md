@@ -88,5 +88,8 @@ The program has checked that there are no Buy positions, this is the reason to o
 
 Further code will be completely clear to you - I have not used any new methods in it.
 
+### Firmware basics immersion
+1. [About primary functions](doc/primaryFunctions.md)
+
 Authors: 
 <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
