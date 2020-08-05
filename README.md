@@ -52,7 +52,8 @@ function everyPriceWait () {
 
 }
 ```
-What does this algorithm do?
+
+##### What does this algorithm do?
 
 `everyPriceWait` is a primary function. It is called every time the price of the exchange is updated, but ignores the price update for the next 2 seconds.  That is, when the price on any exchange changes in any direction, the terminal calls the function `everyPriceWait`, but if the price changes again before 2 seconds, the function ignores this change. What is it for? If the exchange price is updated very frequently, your requests to close or open positions may not work correctly. You can increase the time to ignore requests by calling the `changeEveryPriceWaitTime(ms)` function. The source code of the `everyPriceWait` function can be found at `````/scripts/everyPriceWait.js`````.
 
@@ -63,6 +64,25 @@ I used class `indicators` to get indicator data. From this class, I called the m
 When the percentage delta between ByBit and Deribit is greater than 0.115, the code will check whether the exchange has an open short - `havePosition(deribit.positions(), 'Buy')`. The first parameter I call the exchange volume `deribit`, it contains the function `positions()` - it returns all open positions in the exchange. Function `havePosition` takes the list of positions at the exchange from function `deribit.positions()` as the first argument, the second argument function takes the type of position - buy or sell. Note that you should always write only `Buy` for buy and `Sell` for sell positions. Parameters `sell`, `seLL`, etc. will be ignored. 
 
 The function `havePosition` returns `False` if the position is not found and returns the object of the position if it is found. 
+
+Example position object:
+
+```json
+{
+   "exchange": "Deribit",
+   "symbol": "BTC-PERPETUAL",
+   "side": "Sell",
+   "size": -50,
+   "leverage": 100,
+   "take_profit": false,
+   "stop_loss": false,
+   "pnl": -0.000001,
+   "created_at": false,
+   "fee": false,
+   "margin": 0.000043833,
+   "liq": -5
+}
+```
 
 The program has checked that there are no Buy positions, this is the reason to open a market Buy order! I used the `deribit.buy(false, 50);` method to buy the bitcoin for $50 at the market price. To open a Buy Limit order, you must use the method `deribit.buy(price, 50);`. Thus you will buy the bitcoin for $50 at the price of `price`.
 

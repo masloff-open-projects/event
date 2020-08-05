@@ -1,5 +1,7 @@
 function everyPriceWait() {
 
+  UI.log(havePosition(deribit.positions(), 'Sell'))
+  
   var delta = 0.115;
 
   if (indicators.delta().bybit.deribit.percent.A > delta) {
