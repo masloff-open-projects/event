@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e458b85e-ce44-4fe3-a13a-5740b4433596" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -68,7 +69,7 @@
       <workItem from="1596524926823" duration="35505000" />
       <workItem from="1596565083934" duration="779000" />
       <workItem from="1596566345182" duration="3489000" />
-      <workItem from="1596619180803" duration="1540000" />
+      <workItem from="1596619180803" duration="2139000" />
     </task>
     <servers />
   </component>
@@ -80,10 +81,10 @@
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
     <state x="717" y="324" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1044@0.0.1920.1044" timestamp="1596383367822" />
-    <state x="743" y="280" width="424" height="483" key="FileChooserDialogImpl" timestamp="1596194337736">
+    <state x="743" y="280" width="424" height="483" key="FileChooserDialogImpl" timestamp="1596621262195">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="743" y="280" width="424" height="483" key="FileChooserDialogImpl/0.0.1920.1044@0.0.1920.1044" timestamp="1596194337736" />
+    <state x="743" y="280" width="424" height="483" key="FileChooserDialogImpl/0.0.1920.1044@0.0.1920.1044" timestamp="1596621262195" />
     <state x="565" y="136" width="790" height="772" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1596529215848">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>

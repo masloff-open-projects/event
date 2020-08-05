@@ -1,16 +1,16 @@
 <img src="https://svgshare.com/i/NWh.svg" alt="Event-banner" border="0" width="100%">
 
-# Документация по работе с терминалом Event
-Терминал Event умеет воспроизводить пользовательский код.
+# Welcome to the Event!
+A terminal that supports any automated trading methods.
 
-Чтобы открыть редактор кода, перейдите в терминал и нажмите Logic Editor. Перед вами откроется редактор пользовательского кода.
-Весь код пишется на языке JavaScript. В вашем окружении есть следующие функции и переменные:
+You are on the main page of the trading terminal Event! Let me tell you a little about it. The Event terminal is written on Node.js, it has a web interface for quick navigation through the terminal settings and data. The terminal supports methods of technical analysis, indicators of exchange delta prices. Ah yes, the terminal supports the work with several exchanges. You can connect to the terminal multiple exchangers, the list of available exchangers you will see below. 
 
-| Метод  | Описание |
-| ------------- | ------------- |
-| {exchange}.balance.btc  | Получить стоимость BTC на бирже |
-| {exchange}.buy(price, qty)  | Открыть лонг на бирже |
-| {exchange}.sell(price, qty)  | Открыть лонг на бирже |
+| Exchange      | Monitoring    | Trading |
+| ------------- | ------------- | ------ |
+| ByBit         | [+]  | [-] |
+| Deribit       | [+]  | [-] |
+| Bittrex       | [+]  | [-] |
+| BitMex        | [+]  | [-] |
 
 
 Authors: 
