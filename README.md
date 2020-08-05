@@ -7,10 +7,10 @@ You are on the main page of the trading terminal Event! Let me tell you a little
 
 | Exchange      | Monitoring    | Trading |
 | ------------- | ------------- | ------ |
-| ByBit         | [+]  | [-] |
-| Deribit       | [+]  | [-] |
-| Bittrex       | [+]  | [-] |
-| BitMex        | [+]  | [-] |
+| ByBit         | Yes  | Yes |
+| Deribit       | Yes  | Yes |
+| Bittrex       | Yes  | No  |
+| BitMex        | Yes  | No  |
 
 
 Authors: 
