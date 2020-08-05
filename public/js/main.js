@@ -57,6 +57,11 @@ $(document).ready(function() {
         localStorage.setItem(`lineShow-${lineId}`, (this.value == "true" || this.value == true) ? true : false);
         window.chart_object.applyOptions({});
     });
+    $(`[data-action="changeIndicatorShow"]`).change(function(e) {
+        let indicatorId = $(this).attr('data-indicator');
+        localStorage.setItem(`indicator-${indicatorId}-exchange`, (this.value == "false" || this.value == false) ? false : this.value);
+        window.chart_object.applyOptions({});
+    });
 
     for (const element of $(`[data-action="changeLineShow"]`)) {
         let lineId = $(element).attr('data-line');
@@ -134,14 +139,12 @@ $(document).ready(function() {
                 let side = $(this).attr('data-side');
                 let symbol = $(this).attr('data-symbol');
 
-                if (prompt('If you want close position, please type `Close`:') == 'Close') {
-                    wss_stream.send('openMarketPosition', {
-                        exchange: exchange.toLocaleLowerCase(),
-                        size: Math.abs(size),
-                        side: side == 'Buy' ? 'Sell' : 'Buy',
-                        symbol: symbol
-                    });
-                }
+                wss_stream.send('openMarketPosition', {
+                    exchange: exchange.toLocaleLowerCase(),
+                    size: Math.abs(size),
+                    side: side == 'Buy' ? 'Sell' : 'Buy',
+                    symbol: symbol
+                });
             }
 
         },
@@ -182,7 +185,13 @@ $(document).resize(function() {
 wss_stream.on ('actions', function (e=null) {
     return {
         'balance': {},
-        'indicators': {},
+        'indicators': {
+            deltas: localStorage.getItem(`indicator-deltas`) === null ? true : localStorage.getItem(`indicator-deltas`),
+            SMA: {
+                exchange: localStorage.getItem(`indicator-SMA-exchange`) === null ? false : localStorage.getItem(`indicator-SMA-exchange`),
+                period: localStorage.getItem(`indicator-SMA-period`) === null ? 1 : localStorage.getItem(`indicator-SMA-period`)
+            },
+        },
         'conditions': {},
         'positions': {},
         'ordersBook': {
@@ -386,11 +395,12 @@ $(document).ready(function (e) {
         if (typeof e == typeof []) {
 
             let indicators = e[0];
+            let deltas = indicators.deltas; 
 
-            for (const e in indicators) {
-                for (const e_ in indicators[e]) {
+            for (const e in deltas) {
+                for (const e_ in deltas[e]) {
                     if (e != e_) {
-                        let delta = indicators[e][e_].delta;
+                        let delta = deltas[e][e_].delta;
 
                         if (!$(`#delta-data-${e}-${e_}-value`).length) {
                             $('#deltas-list-body').append(`<tr> <td id="delta-data-${e}-${e_}-name">Delta name</td> <td id="delta-data-${e}-${e_}-value">0</td> </tr>`);

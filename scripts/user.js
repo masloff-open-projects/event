@@ -1,5 +1,5 @@
  function everyPrice () {
- 	UI.set(indicators.SMA());
+ 	//UI.log(indicators.SMA());
    //deribit.sell();
  }
 //

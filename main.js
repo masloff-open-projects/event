@@ -471,7 +471,12 @@ wsse.register('console', function (e) {
 wsse.register('indicators', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
-            resolve(indicators.delta());
+            var returnData = {};
+
+            if(e.data.deltas != 'false' && e.data.deltas != false) { returnData['deltas'] = indicators.delta(); }
+            if(e.data.SMA.exchange != 'false' && e.data.SMA.exchange != false) { returnData['SMA'] = indicators.SMA(e.data.SMA.exchange, e.data.SMA.period); }
+
+            resolve(returnData);
         })
     ]);
 });
