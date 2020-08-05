@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e458b85e-ce44-4fe3-a13a-5740b4433596" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/doc/vm.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/primaryFunctions.md" beforeDir="false" afterPath="$PROJECT_DIR$/doc/primaryFunctions.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/vm.md" beforeDir="false" afterPath="$PROJECT_DIR$/doc/vm.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +69,7 @@
       <workItem from="1596524926823" duration="35505000" />
       <workItem from="1596565083934" duration="779000" />
       <workItem from="1596566345182" duration="3489000" />
-      <workItem from="1596619180803" duration="9298000" />
+      <workItem from="1596619180803" duration="9668000" />
     </task>
     <servers />
   </component>
@@ -95,10 +93,10 @@
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
     <state x="664" y="130" width="592" height="783" key="find.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596542915431" />
-    <state x="624" y="238" key="run.anything.popup" timestamp="1596392474228">
+    <state x="624" y="238" key="run.anything.popup" timestamp="1596628847249">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="624" y="238" key="run.anything.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596392474228" />
+    <state x="624" y="238" key="run.anything.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596628847249" />
     <state x="623" y="230" width="672" height="678" key="search.everywhere.popup" timestamp="1596548461203">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
