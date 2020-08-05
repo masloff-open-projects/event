@@ -24,4 +24,4 @@ The firmware sucks from the functions that the terminal calls during certain act
 
 In addition to the functions, you also have access to the environment methods, which you can call yourself
 
-Go to [VM functions](doc/vm.md) if you want read it.
+Go to [VM functions](vm.md) if you want read it.
