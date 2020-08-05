@@ -224,7 +224,9 @@ global.vm_context = {
         },
         volume: () => {
             return global.data.size.bittrex;
-        }
+        },
+        buy: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {},
+        sell: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {},
     },
     bitmex: {
         price: () => {
@@ -235,7 +237,9 @@ global.vm_context = {
         },
         volume: () => {
             return global.data.size.bitmex;
-        }
+        },
+        buy: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {},
+        sell: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {},
     }
 }
 global.vm_scripts = {
