@@ -91,6 +91,8 @@ Further code will be completely clear to you - I have not used any new methods i
 ### Firmware basics immersion
 1. [About primary functions](doc/primaryFunctions.md)
 2. [VM functions](doc/vm.md)
+3. [Exchanges compatibility](doc/compatibility.md)
+4. [Indicators](doc/indicators.md)
 
 Authors: 
 <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
