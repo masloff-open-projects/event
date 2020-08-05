@@ -149,9 +149,9 @@ global.vm_context = {
     len: (e) => {
         return (e ? e : []).length;
     },
-    havePosition: (e, side='Sell') => {
-        if (e != []) {
-            for (const P of e) {
+    havePosition: (positions=[], side='Sell') => {
+        if (positions != []) {
+            for (const P of positions) {
                 if ('side' in P && P.side == side) {
                     return P;
                 }
@@ -162,9 +162,6 @@ global.vm_context = {
     },
     indicators: indicators,
     time: function () { parseInt(new Date().getTime()/1000) },
-    data: function () {
-        return global.data;
-    },
     bybit: {
         price: () => {
             return global.data.price.bybit;
