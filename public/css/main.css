@@ -171,6 +171,7 @@ nav.main > ul > li {
     list-style: none;
     height: auto;
     padding: 8px;
+    display: inline-block;
 }
 
 nav.main {

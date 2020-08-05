@@ -13,6 +13,7 @@ const stream_telegram = require('./lib/telegram.js');
 const stream_data = require('./lib/data.js');
 const stream_indicators = require('./lib/indicators.js');
 const stream_csv = require('./lib/csv.js');
+const stream_vm = require('./lib/VM.js');
 
 const fs = require ('fs');
 const dotenv = require('dotenv');
@@ -106,153 +107,24 @@ global.data = {
         bitmex: {}
     }
 }
-global.vm_context = {
-    UI: {
-        text: "",
-        error: "",
-        console: [],
-        set: function (e) {
-            this.text = e;
-        },
-        log: function (e) {
-            this.console.unshift({
-                message: e,
-                time: new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1"),
-                type: 'message'
-            });
-            if (this.console.length > 52) { this.console.pop(); }
-        },
-        err: function (e) {
-            this.console.unshift({
-                message: e,
-                time: new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1"),
-                type: 'error'
-            });
-            if (this.console.length > 52) { this.console.pop(); }
-        },
-        clearConsole: function () {
-            this.console = [];
-        },
-        chart: {
-            markers: [],
-            marker: function (text='Marker') {
-                const time = Math.round(+new Date()/1000);
-                this.markers.push({ time: time, position: 'aboveBar', color: '#0074f6', shape: 'arrowDown', text: text });
-                if (this.markers.length > 52) { this.markers.shift(); }
-            }
-        }
-    },
-    telegram: telegram,
-    env: (e) => {
-        return (e in process.env ? process.env[e] : false);
-    },
-    len: (e) => {
-        return (e ? e : []).length;
-    },
-    havePosition: (positions=[], side='Sell') => {
-        if (positions != []) {
-            for (const P of positions) {
-                if ('side' in P && P.side == side) {
-                    return P;
-                }
-            }
-        }
-
-        return false;
-    },
-    indicators: indicators,
-    time: function () { parseInt(new Date().getTime()/1000) },
-    bybit: {
-        price: () => {
-            return global.data.price.bybit;
-        },
-        positions: () => {
-            return local.get('positions/bybit');
-        },
-        volume: () => {
-            return global.data.size.bybit;
-        },
-        buy: (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') => {
-            if (price) {
-                return exchange.limit('bybit', 'Buy', symbol, qty, price);
-            } else {
-                return exchange.market('bybit', 'Buy', symbol, qty);
-            }
-        },
-        sell: function (price=false, qty=process.env.CAPITAL, symbol='BTCUSD') {
-            if (price) {
-                return exchange.limit('bybit', 'Sell', symbol, qty, price);
-            } else {
-                return exchange.market('bybit', 'Sell', symbol, qty);
-            }
-        }
-    },
-    deribit: {
-        price: () => {
-            return global.data.price.deribit;
-        },
-        positions: () => {
-            return local.get('positions/deribit');
-        },
-        getPositions: () => {
-            return exchange.positions('deribit');
-        },
-        volume: () => {
-            return global.data.size.deribit;
-        },
-        buy: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {
-            if (price) {
-                return exchange.limit('deribit', 'Buy', symbol, qty, price);
-            } else {
-                return exchange.market('deribit', 'Buy', symbol, qty);
-            }
-        },
-        sell: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {
-            if (price) {
-                return exchange.limit('deribit', 'Sell', symbol, qty, price);
-            } else {
-                return exchange.market('deribit', 'Sell', symbol, qty);
-            }
-        },
-    },
-    bittrex: {
-        price: () => {
-            return global.data.price.bittrex;
-        },
-        positions: () => {
-            return local.get('positions/bittrex');
-        },
-        volume: () => {
-            return global.data.size.bittrex;
-        },
-        buy: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {},
-        sell: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {},
-    },
-    bitmex: {
-        price: () => {
-            return global.data.price.bitmex;
-        },
-        positions: () => {
-            return local.get('positions/bitmex');
-        },
-        volume: () => {
-            return global.data.size.bitmex;
-        },
-        buy: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {},
-        sell: function (price=false, qty=process.env.CAPITAL, symbol='BTC-PERPETUAL') {},
-    }
-}
-global.vm_scripts = {
-    init: fs.readFileSync(__dirname + "/scripts/init.js"),
-    everyPrice: fs.readFileSync(__dirname + "/scripts/everyPrice.js"),
-    everyPriceWait: fs.readFileSync(__dirname + "/scripts/everyPriceWait.js")
-}
 global.big_data = {
     priceHistory: {},
     volumeHistory: {},
 }
 
-const e = new stream_events (local);
+const virtualEnv = new stream_vm ({
+    local: local,
+    exchange: exchange,
+    telegram: telegram,
+    indicators: indicators,
+    csv: csv
+});
+
+virtualEnv.init();
+
+const e = new stream_events (virtualEnv, local);
+
+virtualEnv.execute('everyPrice');
 
 /**
  * ByByit connect to stream
@@ -463,7 +335,7 @@ wsse.register('console', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
             resolve({
-                UI: global.vm_context.UI
+                UI: virtualEnv.currentContext().UI
             });
         })
     ]);
@@ -694,6 +566,9 @@ telegram.register('/pnl', function () {
 
 });
 
+telegram.on('polling_error', function () {});
+telegram.on('webhook_error', function () {});
+
 app.get('/', function (req, res) {
     res.sendFile(__dirname + "/html/index.html");
 });
@@ -706,9 +581,17 @@ app.get('/get/script/user', function (req, res) {
     res.sendFile(__dirname + "/scripts/user.js");
 });
 
+app.get('/view/:file', function (req, res) {
+    res.sendFile(__dirname + "/html/csv.html");
+})
+
+app.get('/file/:file', function (req, res) {
+    res.sendFile(__dirname + "/db/" + req.params.file);
+})
+
 app.post('/set/script/user', function (req, res) {
     if ('code' in req.body) {
-        fs.writeFileSync(__dirname + "/scripts/user.js", req.body.code)
+        fs.writeFileSync(__dirname + "/scripts/user.js", req.body.code);
+        res.sendStatus(200);
     }
-    res.sendStatus(200);
 });

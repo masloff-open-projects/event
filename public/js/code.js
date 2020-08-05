@@ -1,51 +1,29 @@
+var require = { paths: { 'vs': '/complex/monaco/min/vs' } };
+
 $(document).ready(function () {
-    if (!('logic_editor' in window)) {
 
-        $.get("/get/script/user", function(data) {
-            $("#logic_textarea").text(data);
+    $.get("/get/script/user", function(data) {
+        const editor = monaco.editor.create(document.getElementById('container'), {
+            value: data,
+            language: 'javascript',
+            automaticLayout: true,
+            theme: "vs-dark",
+        });
 
-            window.logic_editor = CodeMirror.fromTextArea(logic_textarea, {
-                lineNumbers: true,
-                styleActiveLine: true,
-                matchBrackets: true,
-                mode: "text/javascript",
-                // keyMap: "sublime",
-                theme: 'darcula',
-                autoCloseTags: true,
-                lineWrapping: true,
-                extraKeys: {
-                    "Ctrl-R": function() {
-                        // do something
-                    },
-                    "Ctrl-S": function() {
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, function() {
 
-                        $.post("/set/script/user", {
-                            code: window.logic_editor.getValue()
-                        }, function(data) {
-                            alert('Saved!');
-                        });
-
-                    },
-                    "Alt": "autocomplete"
-                }
+            $.post("/set/script/user", {
+                code: editor.getValue()
+            }, function(data) {
+                alert('Saved!');
             });
-
-            window.logic_editor.on("keyup", function (cm, event) {
-                if (window.hits) {
-                    if (event.keyCode != 13 && event.keyCode != 39 && event.keyCode != 37 && event.keyCode != 8 && !cm.state.completionActive) {
-                        clearTimeout(window.cm_autocomplite);
-                        window.cm_autocomplite = setTimeout(function () {
-                            CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
-                        }, 1550);
-
-                    } else if (event.keyCode == 13 || event.keyCode == 8) {
-                        clearTimeout(window.cm_autocomplite);
-                    }
-                }
-            });
-
 
         });
 
-    }
+    });
+
+});
+
+$(document).resize(function() {
+    monaco.editor.layout();
 });

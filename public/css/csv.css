@@ -1,0 +1,31 @@
+body, html {
+    background: white;
+}
+
+.body {
+    padding: 24px;
+}
+
+nav.main > ul {
+    height: auto;
+    margin: 0;
+}
+
+nav.main > ul > li > a {
+    color: #232323;
+    text-decoration: none;
+}
+
+nav.main > ul > li {
+    list-style: none;
+    height: auto;
+    padding: 8px;
+    display: inline-block;
+}
+
+nav.main {
+    height: auto;
+    width: 100%;
+    background: #fbfbfb;
+    border-bottom: 1px solid #e2e2e2;
+}
