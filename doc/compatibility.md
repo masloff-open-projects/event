@@ -11,5 +11,10 @@ Below is a table on what data the exchanges provide.
 |{exchange}.volume| | | |✔|
 |{exchange}.buy|✔|✔|||
 |{exchange}.sell|✔|✔|||
+|{exchange}.editOrder| |✔|||
+|{exchange}.orders| |✔|||
+|{exchange}.cancelAll| |✔|||
+|{exchange}.getDepositAddress| |✔|||
+|{exchange}.getHistoricalVolatility| |✔|||
 
 You can call methods that are not compatible with your exchanger, but they will either return the void or fail to perform their functions.    

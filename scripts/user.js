@@ -85,5 +85,24 @@ function everyPriceScalping_ (delta=null, side=null, sma=0, sideSMA) {
 function init () {
   	_.update ('everyPriceScalping_exchangeObject', deribit);
     _.update ('everyPriceScalping_symbol', 'btc')
-	UI.log(11234);
+	
+  UI.log(11234);
+  //deribit.editOrder('4291635323', 900, 13000, false, false, 'usd', 180000)
+  
+  // deribit.orders('BTC').then(function (e) {
+  //   UI.log (e);
+  // });
+
+
+  // deribit.cancelAll();
+
+
+  // deribit.getDepositAddress('BTC').then(function (e) {
+  //   UI.log(e.result.address);
+  // });
+
+  // deribit.getHistoricalVolatility('BTC').then(function (e) {
+  //   UI.log(e);
+  // });
 }
+

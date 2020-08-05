@@ -506,6 +506,11 @@ span.pnl-down {
     color: rgba(241, 79, 76, 1);
 }
 
+.close-icon {
+    font-size: 64px;
+    margin: 12px;
+}
+
 div.indicators > .deltas-list {
     padding: 4px 8px;
     margin: 4px 8px;

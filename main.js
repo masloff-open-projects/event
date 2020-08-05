@@ -27,6 +27,7 @@ const BitMEXClient = require('bitmex-realtime-api');
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({httpServer: server});
+const cron = require('cron').CronJob;
 
 dotenv.config();
 server.listen(process.env.PORT, process.env.IP,function() { });
@@ -47,7 +48,7 @@ const keypair = {
 const exchange = new stream_exchange (keypair.bybit, keypair.deribit);
 const wsse = new stream_wss_events ();
 const wss_tunnel = new stream_socket (wss, function (e) { return wsse.wss (e, wsse); })
-const a = new stream_actions ();
+const actions = new stream_actions ();
 const local = new stream_data ();
 const csv = new stream_csv ();
 const indicators = new stream_indicators ();
@@ -126,168 +127,173 @@ const e = new stream_events (virtualEnv, local);
 
 virtualEnv.execute('everyPrice');
 
-/**
- * ByByit connect to stream
- *
- * Get WWS from process.env.WWS_BYBIT
- * Use stream_wws
- */
-
-(function (e=null) {
-
-    stream_wws (process.env.WWS_BYBIT, JSON.stringify({
-        op: "subscribe",
-        args: [
-            "trade.BTCUSD"
-        ]
-    }), {
-        onmessage: function (e=null) {
-
-            let response = JSON.parse(e);
-
-            if ('data' in response && 'topic' in response && response.topic == 'trade.BTCUSD') {
-                global.data.price.bybit.btc = response.data[0].price;
-                global.data.size.bybit.btc = {
-                    size: response.data[0].size,
-                    side: response.data[0].side,
-                };
-            }
-
-        },
-        every: function (event=null) {
-            let response = JSON.parse(event);
-            if ('data' in response && 'topic' in response && response.topic == 'trade.BTCUSD') {
-                e.price('bybit', response.data[0].price, 'BTC')
-            }
-        }
-    }, false);
-
-}) (e);
-
-
-/**
- * Deribit connect to stream
- *
- * Get WSS from process.env.WWS_DERIBIT
- * Use stream_wws
- */
-
 (function (e=null) {
 
 
-    //Get price form Deribit
-    stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
-        "jsonrpc": "2.0",
-        "method": "public/get_index",
-        "id": 12,
-        "params": {
-            "currency": "BTC"
-        }
-    }), {
-        every: function (event=null) {
-            let response = JSON.parse(event);
-            e.price ('deribit', response.result.BTC, 'BTC')
-        }
-    }, true);
+    /**
+     * ByByit connect to stream
+     *
+     * Get WWS from process.env.WWS_BYBIT
+     * Use stream_wws
+     */
 
+    (function (e=null) {
 
-    // Get volumes from Deribit
-    stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
-        "jsonrpc" : "2.0",
-        "id" : 9290,
-        "method" : "public/get_last_trades_by_currency",
-        "params" : {
-            "currency" : "BTC",
-            "count" : 10
-        }
-    }), {
-        every: function (event=null) {
-            let response = JSON.parse(event);
-            for (const position of response.result.trades) {
-                e.volume('deribit', {
-                    size: position.amount,
-                    side: position.direction == 'sell' ? 'Sell' : 'Buy',
-                }, 'BTC');
+        stream_wws (process.env.WWS_BYBIT, JSON.stringify({
+            op: "subscribe",
+            args: [
+                "trade.BTCUSD"
+            ]
+        }), {
+            onmessage: function (e=null) {
+
+                let response = JSON.parse(e);
+
+                if ('data' in response && 'topic' in response && response.topic == 'trade.BTCUSD') {
+                    global.data.price.bybit.btc = response.data[0].price;
+                    global.data.size.bybit.btc = {
+                        size: response.data[0].size,
+                        side: response.data[0].side,
+                    };
+                }
+
+            },
+            every: function (event=null) {
+                let response = JSON.parse(event);
+                if ('data' in response && 'topic' in response && response.topic == 'trade.BTCUSD') {
+                    e.price('bybit', response.data[0].price, 'BTC')
+                }
             }
-        }
-    }, true);
+        }, false);
 
-}) (e);
+    }) (e);
 
 
-/**
- * Bittrex connect to stream
- *
- * Use bittrex.websockets
- */
+    /**
+     * Deribit connect to stream
+     *
+     * Get WSS from process.env.WWS_DERIBIT
+     * Use stream_wws
+     */
 
-(function (e=null) {
+    (function (e=null) {
 
-    bittrex.websockets.listen(function(data, client) {
-        if (data.M === 'updateSummaryState') {
-            data.A.forEach(function(data_for) {
-                data_for.Deltas.forEach(function(marketsDelta) {
-                    if (marketsDelta.MarketName == 'USDT-BTC') {
-                        if ('Last' in marketsDelta) {
-                            e.price ('bittrex', marketsDelta.Last, 'BTC')
+
+        //Get price form Deribit
+        stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
+            "jsonrpc": "2.0",
+            "method": "public/get_index",
+            "id": 12,
+            "params": {
+                "currency": "BTC"
+            }
+        }), {
+            every: function (event=null) {
+                let response = JSON.parse(event);
+                e.price ('deribit', response.result.BTC, 'BTC')
+            }
+        }, true);
+
+
+        // Get volumes from Deribit
+        stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
+            "jsonrpc" : "2.0",
+            "id" : 9290,
+            "method" : "public/get_last_trades_by_currency",
+            "params" : {
+                "currency" : "BTC",
+                "count" : 10
+            }
+        }), {
+            every: function (event=null) {
+                let response = JSON.parse(event);
+                for (const position of response.result.trades) {
+                    e.volume('deribit', {
+                        size: position.amount,
+                        side: position.direction == 'sell' ? 'Sell' : 'Buy',
+                    }, 'BTC');
+                }
+            }
+        }, true);
+
+    }) (e);
+
+
+    /**
+     * Bittrex connect to stream
+     *
+     * Use bittrex.websockets
+     */
+
+    (function (e=null) {
+
+        bittrex.websockets.listen(function(data, client) {
+            if (data.M === 'updateSummaryState') {
+                data.A.forEach(function(data_for) {
+                    data_for.Deltas.forEach(function(marketsDelta) {
+                        if (marketsDelta.MarketName == 'USDT-BTC') {
+                            if ('Last' in marketsDelta) {
+                                e.price ('bittrex', marketsDelta.Last, 'BTC')
+                            }
                         }
-                    }
+                    });
                 });
-            });
-        }
-    });
+            }
+        });
 
-}) (e);
-
-
-/**
- * BitMex connect to stream
- *
- * Use bmc
- */
-
-(function (e=null) {
-
-    /**
-     * Get real-time trade information
-     */
-
-    bmc.addStream('XBTUSD', 'trade', function (data, symbol, tableName) {
-        if (!data.length) return;
-        const operate = data[0];
-
-        e.price ('bitmex', operate.price, 'BTC')
-        e.volume ('bitmex', {
-            size: operate.size,
-            side: operate.side,
-        }, 'BTC');
-
-    });
+    }) (e);
 
 
     /**
-     * Get real-time liquidation information
+     * BitMex connect to stream
+     *
+     * Use bmc
      */
 
-    bmc.addStream('XBTUSD', 'liquidation', function (data, symbol, tableName) {
-        if (!data.length) return;
-        const operate = data[0];
-        e.liquidation('bitmex', operate, 'BTC')
-    });
+    (function (e=null) {
+
+        /**
+         * Get real-time trade information
+         */
+
+        bmc.addStream('XBTUSD', 'trade', function (data, symbol, tableName) {
+            if (!data.length) return;
+            const operate = data[0];
+
+            e.price ('bitmex', operate.price, 'BTC')
+            e.volume ('bitmex', {
+                size: operate.size,
+                side: operate.side,
+            }, 'BTC');
+
+        });
 
 
-    /**
-     * Get real-time orders book
-     */
+        /**
+         * Get real-time liquidation information
+         */
 
-    bmc.addStream('XBTUSD', 'orderBook10', function (data, symbol, tableName) {
-        if (!data.length) return;
-        const operate = data[0];
-        e.book('bitmex', {
-            asks: operate.asks,
-            bids: operate.bids
-        }, 'BTC');
-    });
+        bmc.addStream('XBTUSD', 'liquidation', function (data, symbol, tableName) {
+            if (!data.length) return;
+            const operate = data[0];
+            e.liquidation('bitmex', operate, 'BTC')
+        });
+
+
+        /**
+         * Get real-time orders book
+         */
+
+        bmc.addStream('XBTUSD', 'orderBook10', function (data, symbol, tableName) {
+            if (!data.length) return;
+            const operate = data[0];
+            e.book('bitmex', {
+                asks: operate.asks,
+                bids: operate.bids
+            }, 'BTC');
+        });
+
+    }) (e);
 
 }) (e);
 
@@ -428,134 +434,166 @@ wsse.register('disconnectIP', function (e) {
     ]);
 });
 
-/**
- * Positions streamer
- */
+(new cron('* * * * * *', function() {
 
-setInterval(function () {
+    // Record price
+    (async function () {
 
-    Promise.all([
-        exchange.positions('bybit'),
-        exchange.positions('deribit')
-    ]).then(function ([bybit, deribit]) {
+        const time = Math.round(+new Date()/1000);
 
-        /**
-         * Стандартизация ...
-         */
+        for (const e in global.data.price) {
+            let price = global.data.price[e];
 
-        var positions = {
-            bybit: [],
-            deribit: []
-        };
+            for (const symbol in price) {
+                let value = price[symbol];
 
-        if (bybit.ret_msg == 'ok') {
+                if (!(e in global.big_data.priceHistory)) { global.big_data.priceHistory[e] = {}; global.big_data.priceHistory[e].btc = [] }
+                if (global.big_data.priceHistory[e][symbol].length > 8000) { global.big_data.priceHistory[e][symbol].shift() }
 
-            for (const position of bybit.result) {
-                if (position.size != 0) {
-
-                    let data = {
-                        exchange: 'ByBit',
-                        symbol: position.symbol,
-                        side: position.side,
-                        size: position.size,
-                        leverage: position.leverage,
-                        take_profit: position.take_profit,
-                        stop_loss: position.stop_loss,
-                        pnl: position.unrealised_pnl,
-                        created_at: position.created_at,
-                        fee: position.occ_closing_fee,
-                        margin: position.position_margin,
-                        liq: position.liq_price,
-                    };
-                    positions.bybit.push(data);
+                if (value) {
+                    global.big_data.priceHistory[e][symbol].push({time: time, value: value});
                 }
             }
 
         }
 
-        if ('result' in deribit) {
+    }) ();
 
-            for (const position of deribit.result) {
-               if (position.size != 0) {
-                   let data = {
-                       exchange: 'Deribit',
-                       symbol: position.instrument_name,
-                       side: position.direction == 'buy' ? 'Buy' : 'Sell',
-                       size: position.size,
-                       leverage: position.leverage,
-                       take_profit: false,
-                       stop_loss: false,
-                       pnl: position.total_profit_loss,
-                       created_at: false,
-                       fee: false,
-                       margin: position.initial_margin,
-                       liq: position.estimated_liquidation_price
-                   };
+    // Record deltas
+    (async function () {
 
-                   positions.deribit.push(data);
-               }
-            }
-        }
+        var delta = indicators.delta();
 
-        local.set('positions/bybit', positions.bybit);
-        local.set('positions/deribit', positions.deribit);
+        for (const e_ in delta) {
+            for (const e__ in delta[e_]) {
+                if (e__ != e_) {
+                    let value = delta[e_][e__];
 
-    });
-
-}, 1900);
-
-
-/**
- * Price history recorder
- */
-
-setInterval(function (e=null) {
-
-    const time = Math.round(+new Date()/1000);
-
-    for (const e in global.data.price) {
-        let price = global.data.price[e];
-
-        for (const symbol in price) {
-            let value = price[symbol];
-
-            if (!(e in global.big_data.priceHistory)) { global.big_data.priceHistory[e] = {}; global.big_data.priceHistory[e].btc = [] }
-            if (global.big_data.priceHistory[e][symbol].length > 8000) { global.big_data.priceHistory[e][symbol].shift() }
-
-            if (value) {
-                global.big_data.priceHistory[e][symbol].push({time: time, value: value});
-            }
-        }
-
-    }
-}, 1000);
-
-
-/**
- * Deltas recorder
- */
-
-setInterval(function (e=null) {
-
-    var delta = indicators.delta();
-    for (const e_ in delta) {
-        for (const e__ in delta[e_]) {
-            if (e__ != e_) {
-                let value = delta[e_][e__];
-
-                for (const type in value) {
-                    if (typeof value[type] == typeof "" || typeof value[type] == typeof 0 || typeof value[type] == typeof 0.0) {
-                        csv.open(`db/indicators_${e__}_${e_}_${type}.csv`);
-                        csv.write([
-                            value.delta
-                        ]);
+                    for (const type in value) {
+                        if (typeof value[type] == typeof "" || typeof value[type] == typeof 0 || typeof value[type] == typeof 0.0) {
+                            csv.open(`db/indicators_${e__}_${e_}_${type}.csv`);
+                            csv.write([
+                                value.delta
+                            ]);
+                        }
                     }
                 }
             }
         }
-    }
 
-}, 1000)
+    }) ();
+
+    // Record volume history
+    (async function () {
+
+        const time = Math.round(+new Date()/1000);
+
+        for (const e in global.data.size) {
+
+            for (const symbol in global.data.size[e]) {
+
+                d = global.data.size[e][symbol];
+
+                if (!(e in global.big_data.volumeHistory)) { global.big_data.volumeHistory[e] = {}; global.big_data.volumeHistory[e][symbol] = [] }
+                if (global.big_data.volumeHistory[e][symbol].length > 8000) { global.big_data.volumeHistory[e][symbol].shift() }
+
+                global.big_data.volumeHistory[e][symbol].push({
+                    time: time,
+                    value: d.size,
+                    color: d.side == 'Buy' ? 'rgba(121, 184, 61, 0.3)' : 'rgba(188, 71, 103, 0.3)'
+                });
+
+            }
+
+        }
+
+
+    }) ();
+
+    // Get positions
+    (async function () {
+
+        Promise.all([
+            exchange.positions('bybit'),
+            exchange.positions('deribit')
+        ]).then(function ([bybit, deribit]) {
+
+            var positions = {
+                bybit: [],
+                deribit: []
+            };
+
+            if (bybit.ret_msg == 'ok' && (Symbol.iterator in Object(bybit.result))) {
+
+                for (const position of bybit.result) {
+                    if (position.size != 0) {
+
+                        let data = {
+                            exchange: 'ByBit',
+                            symbol: position.symbol,
+                            side: position.side,
+                            size: position.size,
+                            leverage: position.leverage,
+                            take_profit: position.take_profit,
+                            stop_loss: position.stop_loss,
+                            pnl: position.unrealised_pnl,
+                            created_at: position.created_at,
+                            fee: position.occ_closing_fee,
+                            margin: position.position_margin,
+                            liq: position.liq_price,
+                        };
+                        positions.bybit.push(data);
+                    }
+                }
+
+            }
+
+            if ('result' in deribit && deribit.result && (Symbol.iterator in Object(deribit.result))) {
+                for (const position of deribit.result) {
+                    if (position.size != 0) {
+                        let data = {
+                            exchange: 'Deribit',
+                            symbol: position.instrument_name,
+                            side: position.direction == 'buy' ? 'Buy' : 'Sell',
+                            size: position.size,
+                            leverage: position.leverage,
+                            take_profit: false,
+                            stop_loss: false,
+                            pnl: position.total_profit_loss,
+                            created_at: false,
+                            fee: false,
+                            margin: position.initial_margin,
+                            liq: position.estimated_liquidation_price
+                        };
+
+                        positions.deribit.push(data);
+                    }
+                }
+            }
+
+            local.set('positions/bybit', positions.bybit);
+            local.set('positions/deribit', positions.deribit);
+
+        });
+
+    }) ();
+
+}, null, true, 'America/Los_Angeles')).start();
+
+(new cron('*/10 * * * *', function() {
+
+    // Reauth on Deribit
+    (async function () {
+        exchange.auth('deribit');
+    }) ();
+
+}, null, true, 'America/Los_Angeles')).start();
+
+
+/**
+ * Positions streamer
+ */
+
 
 
 /**
