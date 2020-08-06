@@ -69,7 +69,7 @@ I created the variable `percentDelta` to save the value of the indicator `percen
 
 With the `indicators.call` I called the indicator I needed. In order not to force the terminal to calculate all possible variants of indicators, I made a specification in the form of an object:
 
-``` json
+``` javascript
 {
     symbol: 'btc',
     e1: 'bybit',

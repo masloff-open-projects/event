@@ -15,11 +15,14 @@ To enjoy a virtual environment with comfort, you need to know what environmental
 | len | list | Get the length of the list |
 | havePosition | `{exchange}.positions()` and `side` | If a position from the list of positions with the corresponding side is found, it will return the position object. If not, it will return False |
 | time | Don`t have params | Returns the current time stamp to UNIX |
-| [indicators](indicators.md) | Don`t have params | Directly related to the class of `indicators` |
+| [indicators](indicators.md).call | `indicatorName` and `params` | Get the calculations for the indicator |
+| [indicators](indicators.md).register | `indicatorName` and `callback` | Registration indicator |
 | {exchange}.price | Don`t have params | Returns the current price from the exchange. |
 | {exchange}.positions | Don`t have params | Returns current open positions from the exchange |
 | {exchange}.volume | Don`t have params | Returns current trading volumes from the exchange |
 | {exchange}.buy | `price:int`, `quantity:int` and `instrument:string`  | Will make a buy |
 | {exchange}.sell | `price:int`, `quantity:int` and `instrument:string` | Will make a sell |
 
-Further you can study the [compatibility of methods](compatibility.md) with the stock exchanges and study the class of [indicators](indicators.md)
+### Next
+1. [Compatibility of exchange methods](compatibility.md)
+2. [Indicators](indicators.md)

@@ -21,6 +21,7 @@ The firmware sucks from the functions that the terminal calls during certain act
 | init    | Don`t have params | Called at the start of the terminal  |
 | everyPrice    | Don`t have params | Called up every time the price is updated  |
 | everyPriceWait    | Don`t have params | Called up at each price update, but ignores subsequent requests for some time  |
+| everyPriceScalping    | Don`t have params | Called up at each price update, but ignores subsequent requests for some time  |
 
 In addition to the functions, you also have access to the environment methods, which you can call yourself
 
