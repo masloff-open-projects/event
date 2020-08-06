@@ -68,46 +68,6 @@ app.use(basicAuth({users: {'trader': 'QmHLY3IlrEkRgR82', 'root': 'root'}, challe
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + '/public'));
 
-global.data = {
-    price: {
-        bybit: {
-            btc: 0
-        },
-        deribit: {
-            btc: 0
-        },
-        bitmex: {
-            btc: 0
-        },
-        bittrex: {
-            btc: 0
-        }
-    },
-    size: {
-        bybit: {
-            btc: 0
-        },
-        deribit: {
-            btc: 0
-        },
-        bitmex: {
-            btc: 0
-        },
-        bittrex: {
-            btc: 0
-        }
-    },
-    book: {
-        bitmex: {
-            bids: [],
-            asks: []
-        }
-    },
-    liquidation: {
-        bitmex: {}
-    }
-}
-
 const virtualEnv = new stream_vm ({
     local: local,
     exchange: exchange,
@@ -140,23 +100,14 @@ virtualEnv.execute('everyPrice');
                 "trade.BTCUSD"
             ]
         }), {
-            onmessage: function (e=null) {
-
-                let response = JSON.parse(e);
-
-                if ('data' in response && 'topic' in response && response.topic == 'trade.BTCUSD') {
-                    global.data.price.bybit.btc = response.data[0].price;
-                    global.data.size.bybit.btc = {
-                        size: response.data[0].size,
-                        side: response.data[0].side,
-                    };
-                }
-
-            },
             every: function (event=null) {
                 let response = JSON.parse(event);
                 if ('data' in response && 'topic' in response && response.topic == 'trade.BTCUSD') {
                     e.price('bybit', response.data[0].price, 'BTC')
+                    e.volume ('bybit', {
+                        size: response.data[0].size,
+                        side: response.data[0].side,
+                    }, 'BTC')
                 }
             }
         }, false);
@@ -172,23 +123,6 @@ virtualEnv.execute('everyPrice');
      */
 
     (function (e=null) {
-
-
-        //Get price form Deribit
-        stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
-            "jsonrpc": "2.0",
-            "method": "public/get_index",
-            "id": 12,
-            "params": {
-                "currency": "BTC"
-            }
-        }), {
-            every: function (event=null) {
-                let response = JSON.parse(event);
-                e.price ('deribit', response.result.BTC, 'BTC')
-            }
-        }, true);
-
 
         // Get volumes from Deribit
         stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
@@ -210,6 +144,36 @@ virtualEnv.execute('everyPrice');
                 }
             }
         }, true);
+
+        // Get orderBook and price from Deribit
+        stream_wws (process.env.WWS_DERIBIT, JSON.stringify({
+            "jsonrpc" : "2.0",
+            "id" : 9290,
+            "method" : "public/get_order_book",
+            "params" : {
+                "instrument_name" : "BTC-PERPETUAL",
+                "depth" : 5
+            }
+        }), {
+            every: function (event=null) {
+                let response = JSON.parse(event);
+
+                if ('result' in response && response.result) {
+                    e.book('deribit', {
+                        asks: response.result.asks,
+                        bids: response.result.bids,
+                        minPrice: response.result.min_price,
+                        maxPrice: response.result.max_price,
+                    }, 'BTC');
+
+                    e.price ('deribit', response.result.index_price, 'BTC')
+                }
+
+
+            }
+        }, true);
+
+
 
     }) (e);
 
@@ -292,7 +256,7 @@ virtualEnv.execute('everyPrice');
 
 }) (e);
 
-indicators.register('delta', function (e=null) {
+indicators.register('delta', function (instance=null, e=null) {
 
     if ((typeof e == typeof {}) && ('symbol' in e && 'e1' in e && 'e2' in e)) {
 
@@ -335,7 +299,7 @@ indicators.register('delta', function (e=null) {
 
 });
 
-indicators.register('percent', function (e=null) {
+indicators.register('percent', function (instance=null, e=null) {
 
     if ((typeof e == typeof {}) && ('symbol' in e && 'e1' in e && 'e2' in e)) {
 
@@ -378,7 +342,7 @@ indicators.register('percent', function (e=null) {
 
 });
 
-indicators.register('period_average', function (e=null) {
+indicators.register('period_average', function (instance=null, e=null) {
 
 
     if ((typeof e == typeof {}) && ('symbol' in e && 'e' in e && 'period' in e)) {
@@ -400,12 +364,43 @@ indicators.register('period_average', function (e=null) {
 
 });
 
-wsse.register('size', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-            resolve(global.data.size);
-        })
-    ]);
+indicators.register('SMA', function (instance=null, e=null) {
+
+    if ((typeof e == typeof {}) && ('symbol' in e && 'e' in e && 'period' in e && 'slice' in e)) {
+
+        const history = local.get(`exchange/clearHistory/price/${e.symbol}/${e.e}`);
+        const values = history.reverse().slice(('offset' in e ? e.offset : 0), e.slice == 'all' ? history.length : e.slice);
+
+        return instance.SMA.calculate({period: e.period, values: values.reverse()});
+
+        throw 'Not all the parameters are correct';
+
+    } else {
+        throw 'Function waits for parameters';
+    }
+
+});
+
+indicators.register('MACD', function (instance=null, e=null) {
+
+
+    if ((typeof e == typeof {}) && ('values' in e && 'fastPeriod' in e && 'slowPeriod' in e && 'signalPeriod' in e && 'SimpleMAOscillator' in e && 'SimpleMASignal' in e)) {
+
+        return instance.MACD.calculate({
+            values: e.values,
+            fastPeriod: e.fastPeriod,
+            slowPeriod: e.slowPeriod,
+            signalPeriod: e.signalPeriod ,
+            SimpleMAOscillator: e.SimpleMAOscillator,
+            SimpleMASignal: e.SimpleMASignal
+        });
+
+        throw 'Not all the parameters are correct';
+
+    } else {
+        throw 'Function waits for parameters';
+    }
+
 });
 
 wsse.register('balance', function (e) {

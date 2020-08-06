@@ -89,6 +89,18 @@ $(document).ready(function() {
                 color: '#3e3e3e',
             },
         },
+        autosize: true,
+        interval: 15,
+        timezone: 'America/New_York',
+        theme: 'Light',
+        style: 1,
+        locale: 'en',
+        toolbar_bg: '#f1f3f6',
+        enable_publishing: false,
+        hide_side_toolbar: false,
+        save_image: false,
+        hideideas: true,
+        studies: [],
     });
     window.chart = {
         bybit: window.chart_object.addAreaSeries({
@@ -113,6 +125,10 @@ $(document).ready(function() {
             topColor: 'rgba(241, 79, 76, 0.56)',
             bottomColor: 'rgba(241, 79, 76, 0.04)',
             lineColor: 'rgba(241, 79, 76, 1)',
+            lineWidth: 1,
+        }),
+        custom: window.chart_object.addLineSeries({
+            lineColor: 'rgba(255, 255, 255, 1)',
             lineWidth: 1,
         }),
         volume: window.chart_object.addHistogramSeries({
@@ -167,6 +183,10 @@ $(document).ready(function() {
             "disconnect": {name: "Disconnect", icon: "disconnect"},
         }
     });
+
+    $( function() {
+        $( ".canResize" ).resizable();
+    } );
 
 });
 
@@ -310,70 +330,58 @@ $(document).ready(function (e) {
             let error = e[0].UI.error;
             let text = e[0].UI.text;
             let console = e[0].UI.console;
-            let chart = e[0].UI.chart;
+            let chart = e[0].UI.customChart;
 
+            (async function () {
+                if (text) {
 
-            /**
-             * Обрабатываем текст
-             */
+                    if (text == typeof {}) {
 
-            if (text) {
+                        $("#user-bridge").text('');
 
-                if (text == typeof {}) {
+                        for (const e in text) {
+                            $("#user-bridge").append(`<b>${e}</b>: ${text[e]}<br>`);
+                        }
 
-                    $("#user-bridge").text('');
+                    } else {
+                        $("#user-bridge").text(text);
+                    }
+                } else {
+                    $("#user-bridge").text("");
+                }
+            }) ();
 
-                    for (const e in text) {
-                        $("#user-bridge").append(`<b>${e}</b>: ${text[e]}<br>`);
+            (async function () {
+                if (error) {
+                    $("div#primary-logic-error").css('display', 'block');
+                    $("div#primary-logic-error").text(error);
+                } else {
+                    $("div#primary-logic-error").css('display', '');
+                    $("div#primary-logic-error").text('');
+                }
+            }) ();
+
+            (async function () {
+                if (console) {
+
+                    $("div#console").html("");
+
+                    for (const event of console) {
+                        if (event.type == 'error') {
+                            $("div#console").append(`<div class="message error"> <span class="time">${event.time}</span> <span class="error-conosle-message">${typeof event.message == typeof {} ? JSON.stringify(event.message) : event.message}</span></div>`);
+                        } else {
+                            $("div#console").append(`<div class="message"> <span class="time">${event.time}</span> ${typeof event.message == typeof {} ? JSON.stringify(event.message) : event.message}</div>`);
+                        }
                     }
 
                 } else {
-                    $("#user-bridge").text(text);
+                    $("div#console").html("");
                 }
-            } else {
-                $("#user-bridge").text("");
-            }
+            }) ();
 
-            /**
-             * Обрабатываем ошибки
-             */
-
-            if (error) {
-                $("div#primary-logic-error").css('display', 'block');
-                $("div#primary-logic-error").text(error);
-            } else {
-                $("div#primary-logic-error").css('display', '');
-                $("div#primary-logic-error").text('');
-            }
-
-
-            /**
-             * Рисуем консоль
-             */
-
-            if (console) {
-
-                $("div#console").html("");
-
-                for (const event of console) {
-                    if (event.type == 'error') {
-                        $("div#console").append(`<div class="message error"> <span class="time">${event.time}</span> <span class="error-conosle-message">${typeof event.message == typeof {} ? JSON.stringify(event.message) : event.message}</span></div>`);
-                    } else {
-                        $("div#console").append(`<div class="message"> <span class="time">${event.time}</span> ${typeof event.message == typeof {} ? JSON.stringify(event.message) : event.message}</div>`);
-                    }
-                }
-
-            } else {
-                $("div#console").html("");
-            }
-
-            /**
-             * Маркируем терминал
-             */
-
-            // if (chart.markers.length > 0) {
-            //     charter.set('exchange/markers', Object.assign(charter.get('exchange/markers'), chart.markers));
-            // }
+            (async function () {
+                window.chart.custom.setData(chart);
+            }) ();
 
             wss_stream.send('console', wss_stream.call('actions').console);
 
@@ -445,11 +453,6 @@ $(document).ready(function (e) {
             if (e[0]) {
                 // console.log(e[0]);
             }
-            // let liquidations = e[0];
-            //
-            // if ('size' in liquidations) {
-            //     $("#liquidation-list").html(`<div class="item ${liquidations.size == 'Sell' ? 'sell' : 'buy' }"> <span>BTC</span> <b class="value">${liquidations.leavesQty}</b> </div>`);
-            // }
 
             wss_stream.send('liquidations', wss_stream.call('actions').liquidations);
         }
@@ -509,8 +512,6 @@ $(document).ready(function (e) {
 
             ('price' in document ? null : document.price = {});
             document.price['btc'] = priceHistory[Object.keys(priceHistory)[0]].price;
-
-            // window.chart.bybit.setMarkers(charter.get('exchange/markers'));
 
             $("#exchange_chart_statusbar").text(`Connected!`);
 

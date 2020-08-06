@@ -48,6 +48,7 @@ Delta is price difference indicator between two exchanges
 | e1 | text | First Exchange |
 | e2 | text | Second Exchange |
 
+<hr>
 
 #### Percent
 
@@ -69,6 +70,7 @@ Percent is an indicator of the difference in price between two exchanges in perc
 | e1 | text | First Exchange |
 | e2 | text | Second Exchange |
 
+<hr>
 
 #### Period Average
 
@@ -94,5 +96,68 @@ Period Average is an indicator that shows the average price for a selected perio
 
 <img src='https://svgshare.com/i/NXq.svg' title='' width="80%" align="center">
 <img src='https://svgshare.com/i/NYi.svg' title='' width="80%" align="center"/>
+
+<hr>
+
+#### SMA
+
+``` javascript
+var SMA = indicators.call('SMA', {
+    symbol: 'btc',
+    e: 'deribit',
+    period: 5,
+    slice: 'all'
+});
+```
+
+A simple moving average (SMA) calculates the average of a selected range of prices, usually closing prices, by the number of periods in that range. The SMA is a technical indicator that can aid in determining if an asset price will continue or reverse a bull or bear trend
+
+###### Params
+
+| Key | Type | Description |
+|-------|-------|-------|
+| symbol | text | Currency for which the indicator will be applied |
+| e | text | Exchange |
+| period | text | Period |
+| slice | text | (optional) The first price offset. the same as that of the Period Average indicator. |
+
+
+<hr>
+
+#### MACD
+
+``` javascript
+var SMA = indicators.call('SMA', {
+    symbol: 'btc',
+    e: 'deribit',
+    period: 5,
+    slice: 'all'
+});
+
+var MACD = indicators.call('MACD', {
+    values            : SMA,
+    fastPeriod        : 5,
+    slowPeriod        : 8,
+    signalPeriod      : 3 ,
+    SimpleMAOscillator: false,
+    SimpleMASignal    : false
+  });
+
+```
+
+MACD, short for moving average convergence/divergence, is a trading indicator used in technical analysis of stock prices, created by Gerald Appel in the late 1970s. It is designed to reveal changes in the strength, direction, momentum, and duration of a trend in a stock's price.
+
+###### Params
+
+| Key | Type | Description |
+|-------|-------|-------|
+| values | list | List of closing prices |
+| fastPeriod | int |  |
+| slowPeriod | int |  |
+| signalPeriod | int |  |
+| SimpleMAOscillator | text |  |
+| SimpleMASignal | text |  |
+
+
 
 <!--- <img src='https://svgshare.com/i/NXQ.svg' title='' wdith="100%"/> -->

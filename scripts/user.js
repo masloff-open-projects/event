@@ -1,13 +1,25 @@
 function everyPriceWait () {
   
   // var delta = 0.115;
-  var percentDelta = indicators.call('period_average', {
+  var SMA = indicators.call('SMA', {
     symbol: 'btc',
     e: 'deribit',
-    period: 'all'
+    period: 5,
+    slice: 'all'
   });
 
-  UI.set(percentDelta);
+  UI.customChart = listToChart(SMA);
+
+  var MACD = indicators.call('MACD', {
+    values            : SMA,
+    fastPeriod        : 5,
+    slowPeriod        : 8,
+    signalPeriod      : 3 ,
+    SimpleMAOscillator: false,
+    SimpleMASignal    : false
+  });
+
+  UI.log(MACD);
 
   // UI.log(percentDelta);
 
@@ -114,7 +126,7 @@ function init () {
 
   // deribit.buy(13000, 200); 
 
-  // bybit.buy(); 
+  //deribit.buy(false, 1000); 
 
 }
 
