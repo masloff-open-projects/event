@@ -12,7 +12,7 @@ var percentDelta = indicators.call('percent', {
 });
 ```
 
-I called the `indicators` class, in it I called the call method, in which I passed the indicator name and parameters.
+I called the `indicators` class, in it I called the `call` method, in which I passed the indicator name and parameters.
 
 ``` javascript
 {
@@ -68,6 +68,29 @@ Percent is an indicator of the difference in price between two exchanges in perc
 | symbol | text | Currency for which the indicator will be applied |
 | e1 | text | First Exchange |
 | e2 | text | Second Exchange |
+
+
+#### Period Average
+
+``` javascript
+var percentDelta = indicators.call('period_average', {
+    symbol: 'btc',
+    e: 'deribit',
+    period: 'all'.
+    offset: 0
+});
+```
+
+Period Average is an indicator that shows the average price for a selected period in seconds.
+
+###### Params
+
+| Key | Type | Description |
+|-------|-------|-------|
+| symbol | text | Currency for which the indicator will be applied |
+| e | text | Exchange |
+| period | text or int | Price change period in seconds. If you want use all period, type `all` |
+| offset | int | (optional) Offset in measurement |
 
 
 <!--- <img src='https://svgshare.com/i/NXQ.svg' title='' wdith="100%"/> -->

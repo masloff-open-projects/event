@@ -294,14 +294,6 @@ virtualEnv.execute('everyPrice');
 
 indicators.register('delta', function (e=null) {
 
-    /**
-     * Get a delta between two specific exchanges.
-     *
-     * @param exchange_1
-     * @param exchange_2
-     * @returns {{}}
-     */
-
     if ((typeof e == typeof {}) && ('symbol' in e && 'e1' in e && 'e2' in e)) {
 
         const price1 = local.get(`exchange/real/price/${e.symbol}/${e.e1}`);
@@ -345,14 +337,6 @@ indicators.register('delta', function (e=null) {
 
 indicators.register('percent', function (e=null) {
 
-    /**
-     * Get a percent between two specific exchanges.
-     *
-     * @param exchange_1
-     * @param exchange_2
-     * @returns {{}}
-     */
-
     if ((typeof e == typeof {}) && ('symbol' in e && 'e1' in e && 'e2' in e)) {
 
         const price1 = local.get(`exchange/real/price/${e.symbol}/${e.e1}`);
@@ -390,6 +374,28 @@ indicators.register('percent', function (e=null) {
 
         return returnData;
 
+    }
+
+});
+
+indicators.register('period_average', function (e=null) {
+
+
+    if ((typeof e == typeof {}) && ('symbol' in e && 'e' in e && 'period' in e)) {
+
+        const history = local.get(`exchange/clearHistory/price/${e.symbol}/${e.e}`);
+
+        if (typeof history == typeof []) {
+            const period = history.reverse().slice(('offset' in e ? e.offset : 0), e.period == 'all' ? history.length : e.period);
+            var SumAll = 0;
+            for(i = 0; i < period.length; i++){ SumAll += period[i]; }
+            return (SumAll/period.length)
+        }
+
+        throw 'Not all the parameters are correct';
+
+    } else {
+        throw 'Function waits for parameters';
     }
 
 });
@@ -565,6 +571,8 @@ wsse.register('disconnectIP', function (e) {
                 time: time,
                 value: price
             });
+
+            local.append(`exchange/clearHistory/price/${symbol}/${exchange}`, price);
         }
 
     }) ();

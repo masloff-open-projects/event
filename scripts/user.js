@@ -1,41 +1,41 @@
 function everyPriceWait () {
   
-  var delta = 0.115;
-  var percentDelta = indicators.call('percent', {
+  // var delta = 0.115;
+  var percentDelta = indicators.call('period_average', {
     symbol: 'btc',
-    e1: 'bybit',
-    e2: 'deribit'
+    e: 'deribit',
+    period: 'all'
   });
 
-  UI.log(percentDelta);
+  UI.set(percentDelta);
 
-  // if (indicators.delta().bybit.deribit.percent.A > delta) {
-  //   if (!havePosition(deribit.positions(), 'Buy')) {
-  //     deribit.buy(false, 50);
-  //   }
+  // UI.log(percentDelta);
 
-  //   var position = havePosition(deribit.positions(), 'Sell');
-  //   if (position) {
-  //     deribit.buy(false, position.size);
-  //   }
+  // // if (indicators.delta().bybit.deribit.percent.A > delta) {
+  // //   if (!havePosition(deribit.positions(), 'Buy')) {
+  // //     deribit.buy(false, 50);
+  // //   }
+
+  // //   var position = havePosition(deribit.positions(), 'Sell');
+  // //   if (position) {
+  // //     deribit.buy(false, position.size);
+  // //   }
 
 
-  // } else if (indicators.delta().bybit.deribit.percent.A < delta * -1) {
-  //   if (!havePosition(deribit.positions(), 'Sell')) {
-  //     deribit.sell(false, 50);
-  //   }
+  // // } else if (indicators.delta().bybit.deribit.percent.A < delta * -1) {
+  // //   if (!havePosition(deribit.positions(), 'Sell')) {
+  // //     deribit.sell(false, 50);
+  // //   }
 
-  //   var position = havePosition(deribit.positions(), 'Buy');
-  //   if (position) {
-  //     deribit.sell(false, position.size);
-  //   }
-  // }
+  // //   var position = havePosition(deribit.positions(), 'Buy');
+  // //   if (position) {
+  // //     deribit.sell(false, position.size);
+  // //   }
+  // // }
   
 }
 
-function everyPriceScalping (delta=null, side=null, sma=0, sideSMA) {
-
-  UI.set(`${delta} / ${side} / ${sma} / ${sideSMA}`);
+function everyPriceScalping (delta=null, side=null, sma=0, sideSMA=null) {
 
   var capital = 150;
 
@@ -85,7 +85,7 @@ function everyPriceScalping (delta=null, side=null, sma=0, sideSMA) {
       deribit.sell(false, position.size);
     }
     
-  }
+  }  
   
 }
 
@@ -93,7 +93,7 @@ function init () {
   	_.update ('everyPriceScalping_exchangeObject', deribit);
     _.update ('everyPriceScalping_symbol', 'btc')
 	
-  // UI.log(cwd());
+ 
   //deribit.editOrder('4291635323', 900, 13000, false, false, 'usd', 180000)
   
   // deribit.orders('BTC').then(function (e) {
@@ -114,7 +114,7 @@ function init () {
 
   // deribit.buy(13000, 200); 
 
-  bybit.buy(); 
+  // bybit.buy(); 
 
 }
 

@@ -4,6 +4,8 @@ Not all exchanges provide the data that can be requested by the environment meth
 
 Below is a table on what data the exchanges provide.
 
+#### Table of compatibility
+
 | Method           | ByBit | Deribit | Bittrex | BitMex |
 |----------------- | ----- | ------- | ------- | ------ |
 |{exchange}.price|✔|✔|✔|✔|
