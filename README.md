@@ -27,8 +27,14 @@ Every algorithm that you are going to create for trading is written by you in Ja
 function everyPriceWait () {
 
   var delta = 0.115;
+  var percentDelta = indicators.call('percent', {
+    symbol: 'btc',
+    e1: 'bybit',
+    e2: 'deribit'
+  });
 
-  if (indicators.delta().bybit.deribit.percent.A > delta) {
+
+  if (percentDelta > delta) {
     if (!havePosition(deribit.positions(), 'Buy')) {
       deribit.buy(false, 50);
     }
@@ -39,7 +45,7 @@ function everyPriceWait () {
     }
 
 
-  } else if (indicators.delta().bybit.deribit.percent.A < delta * -1) {
+  } else if (percentDelta < delta * -1) {
     if (!havePosition(deribit.positions(), 'Sell')) {
       deribit.sell(false, 50);
     }
@@ -59,7 +65,19 @@ function everyPriceWait () {
 
 Variable `Delta` denotes the delta of price change, at which the program will open and close trading positions. 
 
-I used class `indicators` to get indicator data. From this class, I called the method `delta()`, which returned me an object with delta all exchanges. To get a relative delta between ByBit and Deribit, I used the keys `bybit` and `deribit` in the body of the answer `indicators.delta()`. The answer of `indicators.delta().bybit.deribit` has several possible values. I am interested in the percentage between the prices of these exchanges. I use the key `percent` to get all possible percentage values. Key `A` specifies that I want to get a percentage between exchanges with type A. As a result, I get this code `indicators.delta().bybit.deribit.percent.A`.
+I created the variable `percentDelta` to save the value of the indicator `percent` in it.
+
+With the `indicators.call` I called the indicator I needed. In order not to force the terminal to calculate all possible variants of indicators, I made a specification in the form of an object:
+
+``` json
+{
+    symbol: 'btc',
+    e1: 'bybit',
+    e2: 'deribit'
+}
+```
+
+In the key `symbol` I specified the currency I want to use for the indicator. In key `e1` and `e2` I indicated the exchanges, which will participate in the calculations.
 
 When the percentage delta between ByBit and Deribit is greater than 0.115, the code will check whether the exchange has an open short - `havePosition(deribit.positions(), 'Buy')`. The first parameter I call the exchange volume `deribit`, it contains the function `positions()` - it returns all open positions in the exchange. Function `havePosition` takes the list of positions at the exchange from function `deribit.positions()` as the first argument, the second argument function takes the type of position - buy or sell. Note that you should always write only `Buy` for buy and `Sell` for sell positions. Parameters `sell`, `seLL`, etc. will be ignored. 
 

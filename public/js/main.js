@@ -49,8 +49,7 @@ $(document).ready(function() {
         }, 300);
     });
 
-    $('#logic').click(function () { $('#logic-modal').modal(); });
-    $('#logic-editor').click(function () { window.open("/code", "", "width=800,height=600"); });
+    $('#logic-editor').click(function () { window.open("/code", "", "width=1200,height=800"); });
 
     $(`[data-action="changeLineShow"]`).change(function(e) {
         let lineId = $(this).attr('data-line');
@@ -185,31 +184,34 @@ $(document).resize(function() {
 wss_stream.on ('actions', function (e=null) {
     return {
         'balance': {},
-        'indicators': {
-            deltas: localStorage.getItem(`indicator-deltas`) === null ? true : localStorage.getItem(`indicator-deltas`),
-            SMA: {
-                exchange: localStorage.getItem(`indicator-SMA-exchange`) === null ? false : localStorage.getItem(`indicator-SMA-exchange`),
-                period: localStorage.getItem(`indicator-SMA-period`) === null ? 1 : localStorage.getItem(`indicator-SMA-period`)
-            },
-        },
+        'indicators': [
+            {
+                name: "delta"
+            }
+        ],
         'conditions': {},
         'positions': {},
         'ordersBook': {
-            symbol: 'BTC',
+            symbol: 'btc',
             exchange: 'bitmex'
         },
-        'price': {},
         'console': {},
         'users': {},
         'connections': {},
         'liquidations': {},
         'priceHistory': {
-            bybit: localStorage.getItem(`lineShow-bybit`) === null ? true : localStorage.getItem(`lineShow-bybit`),
-            deribit: localStorage.getItem(`lineShow-deribit`) === null ? true : localStorage.getItem(`lineShow-deribit`),
-            bittrex: localStorage.getItem(`lineShow-bittrex`) === null ? true : localStorage.getItem(`lineShow-bittrex`),
-            bitmex: localStorage.getItem(`lineShow-bitmex`) === null ? true : localStorage.getItem(`lineShow-bitmex`),
+            symbol: 'btc',
+            exchanges: {
+                bybit: localStorage.getItem(`lineShow-bybit`) === null ? true : localStorage.getItem(`lineShow-bybit`),
+                deribit: localStorage.getItem(`lineShow-deribit`) === null ? true : localStorage.getItem(`lineShow-deribit`),
+                bittrex: localStorage.getItem(`lineShow-bittrex`) === null ? true : localStorage.getItem(`lineShow-bittrex`),
+                bitmex: localStorage.getItem(`lineShow-bitmex`) === null ? true : localStorage.getItem(`lineShow-bitmex`),
+            }
         },
-        'volumeHistory': {},
+        'volumeHistory': {
+            symbol: 'btc',
+            exchange: 'bitmex'
+        },
     }
 });
 
@@ -234,23 +236,10 @@ wss_stream.on ('close', function (e=null) {
 
 $(document).ready(function (e) {
 
-    wss_stream.register('price', function (e=null) {
-        if (typeof e == typeof []) {
-
-            let time = Math.round(+new Date()/1000);
-            let price = e[0];
-
-            document.price = price;
-
-        }
-
-        wss_stream.send('price', wss_stream.call('actions').price);
-    });
-
     wss_stream.register('volumeHistory', function (e=null) {
         if (typeof e == typeof []) {
             let volumes = e[0];
-            window.chart.volume.setData(volumes.deribit.btc);
+            window.chart.volume.setData(volumes);
         }
 
         wss_stream.send('volumeHistory', wss_stream.call('actions').volumeHistory);
@@ -274,12 +263,12 @@ $(document).ready(function (e) {
                 let balance = e[0].result.BTC.available_balance;
                 let bybit_tpnl = e[0].result.BTC.cum_realised_pnl;
                 let bybit_spnl = e[0].result.BTC.realised_pnl;
-                let bybit_tpnl_usd = parseFloat(bybit_tpnl) * ('price' in document ? document.price.bybit.btc : 0);
-                let bybit_spnl_usd = parseFloat(bybit_spnl) * ('price' in document ? document.price.bybit.btc : 0);
+                let bybit_tpnl_usd = parseFloat(bybit_tpnl) * ('price' in document ? document.price.btc : 0);
+                let bybit_spnl_usd = parseFloat(bybit_spnl) * ('price' in document ? document.price.btc : 0);
 
                 $("#balance_bybit").text(balance ? parseFloat(balance).toFixed(4) : '0');
 
-                $("#spnl_bybit").text(bybit_spnl_usd ? parseFloat(bybit_spnl_usd).toFixed(4) : '0')
+                $("#spnl_bybit").text(bybit_spnl ? parseFloat(bybit_spnl).toFixed(4) : '0')
                 $('#spnl_bybit_usd').text(bybit_spnl_usd ? parseFloat(bybit_spnl_usd).toFixed(2) : '0')
 
                 $("#tpnl_bybit").text(bybit_tpnl ? parseFloat(bybit_tpnl).toFixed(4) : '0')
@@ -297,8 +286,8 @@ $(document).ready(function (e) {
             let balance = e[1].result.balance;
             let deribit_tpnl = e[1].result.total_pl;
             let deribit_spnl = e[1].result.session_rpl;
-            let deribit_tpnl_usd = parseFloat(deribit_tpnl) * ('price' in document ? document.price.deribit.btc : 0);
-            let deribit_spnl_usd = parseFloat(deribit_spnl) * ('price' in document ? document.price.deribit.btc : 0);
+            let deribit_tpnl_usd = parseFloat(deribit_tpnl) * ('price' in document ? document.price.btc : 0);
+            let deribit_spnl_usd = parseFloat(deribit_spnl) * ('price' in document ? document.price.btc : 0);
 
             $("#balance_deribit").text(balance ? parseFloat(balance).toFixed(4) : '0');
 
@@ -392,28 +381,31 @@ $(document).ready(function (e) {
     });
 
     wss_stream.register('indicators', function (e=null) {
+
         if (typeof e == typeof []) {
 
             let indicators = e[0];
-            let deltas = indicators.deltas; 
+            let exchanges = indicators.delta;
 
-            for (const e in deltas) {
-                for (const e_ in deltas[e]) {
-                    if (e != e_) {
-                        let delta = deltas[e][e_].delta;
+            for (const exchange in exchanges) {
+                const exchangeBody = exchanges[exchange];
 
-                        if (!$(`#delta-data-${e}-${e_}-value`).length) {
-                            $('#deltas-list-body').append(`<tr> <td id="delta-data-${e}-${e_}-name">Delta name</td> <td id="delta-data-${e}-${e_}-value">0</td> </tr>`);
-                        }
+                for (const exchange_ in exchangeBody) {
+                    const exchangeBody_ = exchangeBody[exchange_]
 
-                        $(`#delta-data-${e}-${e_}-name`).text(`${e}/${e_}`);
-                        $(`#delta-data-${e}-${e_}-name`).attr('class', delta > 0 ? 'up' : 'down');
-                        $(`#delta-data-${e}-${e_}-name`).css('width', `${Math.abs(delta) > 70 ? 70 : Math.abs(delta)}%`);
-                        $(`#delta-data-${e}-${e_}-value`).text(parseFloat(delta).toFixed(2));
-                        $(`#delta-data-${e}-${e_}-value`).attr('class', delta > 0 ? 'int-up' : 'int-down');
-
+                    if (!$(`#delta-data-${exchange}-${exchange_}-value`).length) {
+                        $('#deltas-list-body').append(`<tr> <td id="delta-data-${exchange}-${exchange_}-name">Delta name</td> <td id="delta-data-${exchange}-${exchange_}-value">0</td> </tr>`);
                     }
+
+
+                    $(`#delta-data-${exchange}-${exchange_}-name`).text(`${exchange}/${exchange_}`);
+                    $(`#delta-data-${exchange}-${exchange_}-name`).attr('class', exchangeBody_ > 0 ? 'up' : 'down');
+                    $(`#delta-data-${exchange}-${exchange_}-name`).css('width', `${Math.abs(exchangeBody_) > 70 ? 70 : Math.abs(exchangeBody_)}%`);
+                    $(`#delta-data-${exchange}-${exchange_}-value`).text(parseFloat(exchangeBody_).toFixed(2));
+                    $(`#delta-data-${exchange}-${exchange_}-value`).attr('class', exchangeBody_ > 0 ? 'int-up' : 'int-down');
+                
                 }
+
             }
 
             wss_stream.send('indicators', wss_stream.call('actions').indicators);
@@ -450,11 +442,14 @@ $(document).ready(function (e) {
     wss_stream.register('liquidations', function (e=null) {
         if (typeof e == typeof []) {
 
-            let liquidations = e[0];
-
-            if ('size' in liquidations) {
-                $("#liquidation-list").html(`<div class="item ${liquidations.size == 'Sell' ? 'sell' : 'buy' }"> <span>BTC</span> <b class="value">${liquidations.leavesQty}</b> </div>`);
+            if (e[0]) {
+                // console.log(e[0]);
             }
+            // let liquidations = e[0];
+            //
+            // if ('size' in liquidations) {
+            //     $("#liquidation-list").html(`<div class="item ${liquidations.size == 'Sell' ? 'sell' : 'buy' }"> <span>BTC</span> <b class="value">${liquidations.leavesQty}</b> </div>`);
+            // }
 
             wss_stream.send('liquidations', wss_stream.call('actions').liquidations);
         }
@@ -507,14 +502,18 @@ $(document).ready(function (e) {
 
             let priceHistory = e[0];
 
-            if ('bybit' in priceHistory) { window.chart.bybit.setData(priceHistory.bybit.btc); }
-            if ('deribit' in priceHistory) { window.chart.deribit.setData(priceHistory.deribit.btc); }
-            if ('bittrex' in priceHistory) { window.chart.bittrex.setData(priceHistory.bittrex.btc); }
-            if ('bitmex' in priceHistory) { window.chart.bitmex.setData(priceHistory.bitmex.btc); }
+            if ('bybit' in priceHistory) { window.chart.bybit.setData(priceHistory.bybit.history); } else {  window.chart.bybit.setData([]); }
+            if ('deribit' in priceHistory) { window.chart.deribit.setData(priceHistory.deribit.history); } else { window.chart.deribit.setData([]); }
+            if ('bittrex' in priceHistory) { window.chart.bittrex.setData(priceHistory.bittrex.history); } else { window.chart.bittrex.setData([]); }
+            if ('bitmex' in priceHistory) { window.chart.bitmex.setData(priceHistory.bitmex.history); } else { window.chart.bitmex.setData([]); }
+
+            ('price' in document ? null : document.price = {});
+            document.price['btc'] = priceHistory[Object.keys(priceHistory)[0]].price;
 
             // window.chart.bybit.setMarkers(charter.get('exchange/markers'));
 
             $("#exchange_chart_statusbar").text(`Connected!`);
+
 
             wss_stream.send('priceHistory', wss_stream.call('actions').priceHistory);
 

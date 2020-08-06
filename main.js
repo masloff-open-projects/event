@@ -45,11 +45,11 @@ const keypair = {
     }
 };
 
-const exchange = new stream_exchange (keypair.bybit, keypair.deribit);
+const local = new stream_data ();
+const exchange = new stream_exchange (keypair.bybit, keypair.deribit, local);
 const wsse = new stream_wss_events ();
 const wss_tunnel = new stream_socket (wss, function (e) { return wsse.wss (e, wsse); })
 const actions = new stream_actions ();
-const local = new stream_data ();
 const csv = new stream_csv ();
 const indicators = new stream_indicators ();
 const telegram = new stream_telegram (process.env.TELEGRAM_TOKEN, [
@@ -67,7 +67,6 @@ const bmc = new BitMEXClient({testnet: !process.env.TESTNET});
 app.use(basicAuth({users: {'trader': 'QmHLY3IlrEkRgR82', 'root': 'root'}, challenge: true, realm: 'Imb4T3st4pp'}));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + '/public'));
-
 
 global.data = {
     price: {
@@ -107,10 +106,6 @@ global.data = {
     liquidation: {
         bitmex: {}
     }
-}
-global.big_data = {
-    priceHistory: {},
-    volumeHistory: {},
 }
 
 const virtualEnv = new stream_vm ({
@@ -297,12 +292,106 @@ virtualEnv.execute('everyPrice');
 
 }) (e);
 
-wsse.register('price', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-            resolve(global.data.price);
-        })
-    ]);
+indicators.register('delta', function (e=null) {
+
+    /**
+     * Get a delta between two specific exchanges.
+     *
+     * @param exchange_1
+     * @param exchange_2
+     * @returns {{}}
+     */
+
+    if ((typeof e == typeof {}) && ('symbol' in e && 'e1' in e && 'e2' in e)) {
+
+        const price1 = local.get(`exchange/real/price/${e.symbol}/${e.e1}`);
+        const price2 = local.get(`exchange/real/price/${e.symbol}/${e.e2}`);
+
+        return parseFloat(price1) - parseFloat(price2)
+
+    } else {
+
+        var returnData = {};
+        const priceData = local.list('exchange/real/price/', false);
+
+        for (const _ in priceData) {
+
+            const price = priceData[_];
+            const symbol = _.toLowerCase().split('/')[0];
+            const exchange = _.toLowerCase().split('/')[1];
+
+            for (const __ in priceData) {
+
+                const price__ = priceData[__];
+                const symbol__ = __.toLowerCase().split('/')[0];
+                const exchange__ = __.toLowerCase().split('/')[1];
+
+                if (exchange != exchange__) {
+
+                    (exchange in returnData ? null : returnData[exchange] = {});
+                    returnData[exchange][exchange__] = price - price__;
+
+                }
+
+            }
+
+        }
+
+        return returnData;
+
+    }
+
+});
+
+indicators.register('percent', function (e=null) {
+
+    /**
+     * Get a percent between two specific exchanges.
+     *
+     * @param exchange_1
+     * @param exchange_2
+     * @returns {{}}
+     */
+
+    if ((typeof e == typeof {}) && ('symbol' in e && 'e1' in e && 'e2' in e)) {
+
+        const price1 = local.get(`exchange/real/price/${e.symbol}/${e.e1}`);
+        const price2 = local.get(`exchange/real/price/${e.symbol}/${e.e2}`);
+
+        return (parseInt(price1) - parseInt(price2)/parseInt(price1)) * 100;
+
+    } else {
+
+        var returnData = {};
+        const priceData = local.list('exchange/real/price/', false);
+
+        for (const _ in priceData) {
+
+            const price = priceData[_];
+            const symbol = _.toLowerCase().split('/')[0];
+            const exchange = _.toLowerCase().split('/')[1];
+
+            for (const __ in priceData) {
+
+                const price__ = priceData[__];
+                const symbol__ = __.toLowerCase().split('/')[0];
+                const exchange__ = __.toLowerCase().split('/')[1];
+
+                if (exchange != exchange__) {
+
+                    (exchange in returnData ? null : returnData[exchange] = {});
+                    returnData[exchange][exchange__] = (parseInt(price) - parseInt(price__)/parseInt(price)) * 100;
+
+                }
+
+            }
+
+        }
+
+        return returnData;
+
+    }
+
 });
 
 wsse.register('size', function (e) {
@@ -350,10 +439,14 @@ wsse.register('console', function (e) {
 wsse.register('indicators', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
+
             var returnData = {};
 
-            if(e.data.deltas != 'false' && e.data.deltas != false) { returnData['deltas'] = indicators.delta(); }
-            if(e.data.SMA.exchange != 'false' && e.data.SMA.exchange != false) { returnData['SMA'] = indicators.SMA(e.data.SMA.exchange, e.data.SMA.period); }
+            if ('data' in e && e.data) {
+                for (const indicator of e.data) {
+                    returnData[indicator.name] = indicators.call(indicator.name, {});
+                }
+            }
 
             resolve(returnData);
         })
@@ -377,7 +470,7 @@ wsse.register('positions', function (e) {
 wsse.register('liquidations', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
-            resolve(global.data.liquidation);
+            resolve(local.list('exchange/liquidation/real/', false));
         })
     ]);
 });
@@ -385,7 +478,7 @@ wsse.register('liquidations', function (e) {
 wsse.register('ordersBook', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
-            resolve(local.get(`book/${e.data.exchange}/${e.data.symbol}`))
+            resolve(local.get(`exchange/book/real/${e.data.symbol}/${e.data.exchange}`))
         })
     ]);
 });
@@ -395,15 +488,35 @@ wsse.register('priceHistory', function (e) {
         new Promise((resolve, reject) => {
 
             if ('data' in e && e.data) {
+
                 var returnData = {};
-                for (const exchange in e.data) {
-                    if (e.data[exchange] != false && e.data[exchange] != "false") {
-                        returnData[exchange] = exchange in global.big_data.priceHistory ? global.big_data.priceHistory[exchange] : []
+                const historyData = local.list('exchange/history/price/', false);
+
+                for (const _ in historyData) {
+
+                    const history = historyData[_];
+                    const symbol = _.toLowerCase().split('/')[0];
+                    const exchange = _.toLowerCase().split('/')[1];
+
+                    if (symbol === e.data.symbol && (exchange in e.data.exchanges && (e.data.exchanges[exchange] !== 'false' && e.data.exchanges[exchange] !== false)) ) {
+
+                        const priceData = local.list(`exchange/real/price/${symbol}/`, false);
+
+                        (exchange in returnData ? null : returnData[exchange] = {history: {}, price: {}});
+
+                        returnData[exchange]['history'] = history;
+                        returnData[exchange]['price'] = priceData[exchange];
+
                     }
+
                 }
+
                 resolve(returnData);
+
             } else {
-                resolve(global.big_data.priceHistory);
+
+                resolve(local.list('exchange/history/price/', false));
+
             }
         })
     ]);
@@ -412,7 +525,7 @@ wsse.register('priceHistory', function (e) {
 wsse.register('volumeHistory', function (e) {
     return Promise.all([
         new Promise((resolve, reject) => {
-            resolve(global.big_data.volumeHistory)
+            resolve(local.get(`exchange/history/volume/${e.data.symbol}/${e.data.exchange}`))
         })
     ]);
 });
@@ -437,24 +550,21 @@ wsse.register('disconnectIP', function (e) {
 (new cron('* * * * * *', function() {
 
     // Record price
-    (async function () {
+    (async function (e=null) {
 
         const time = Math.round(+new Date()/1000);
+        const data = local.list('exchange/real/price/', false);
 
-        for (const e in global.data.price) {
-            let price = global.data.price[e];
+        for (const _ in data) {
 
-            for (const symbol in price) {
-                let value = price[symbol];
+            const price = data[_];
+            const symbol = _.toLowerCase().split('/')[0];
+            const exchange = _.toLowerCase().split('/')[1];
 
-                if (!(e in global.big_data.priceHistory)) { global.big_data.priceHistory[e] = {}; global.big_data.priceHistory[e].btc = [] }
-                if (global.big_data.priceHistory[e][symbol].length > 8000) { global.big_data.priceHistory[e][symbol].shift() }
-
-                if (value) {
-                    global.big_data.priceHistory[e][symbol].push({time: time, value: value});
-                }
-            }
-
+            local.append(`exchange/history/price/${symbol}/${exchange}`, {
+                time: time,
+                value: price
+            });
         }
 
     }) ();
@@ -462,60 +572,43 @@ wsse.register('disconnectIP', function (e) {
     // Record deltas
     (async function () {
 
-        var delta = indicators.delta();
-
-        for (const e_ in delta) {
-            for (const e__ in delta[e_]) {
-                if (e__ != e_) {
-                    let value = delta[e_][e__];
-
-                    for (const type in value) {
-                        if (typeof value[type] == typeof "" || typeof value[type] == typeof 0 || typeof value[type] == typeof 0.0) {
-                            csv.open(`db/indicators_${e__}_${e_}_${type}.csv`);
-                            csv.write([
-                                value.delta
-                            ]);
-                        }
-                    }
-                }
-            }
-        }
-
     }) ();
 
     // Record volume history
     (async function () {
 
         const time = Math.round(+new Date()/1000);
+        const data = local.list('exchange/real/volume/', false);
 
-        for (const e in global.data.size) {
+        for (const _ in data) {
 
-            for (const symbol in global.data.size[e]) {
+            const volume = data[_];
+            const symbol = _.toLowerCase().split('/')[0];
+            const exchange = _.toLowerCase().split('/')[1];
 
-                d = global.data.size[e][symbol];
-
-                if (!(e in global.big_data.volumeHistory)) { global.big_data.volumeHistory[e] = {}; global.big_data.volumeHistory[e][symbol] = [] }
-                if (global.big_data.volumeHistory[e][symbol].length > 8000) { global.big_data.volumeHistory[e][symbol].shift() }
-
-                global.big_data.volumeHistory[e][symbol].push({
-                    time: time,
-                    value: d.size,
-                    color: d.side == 'Buy' ? 'rgba(121, 184, 61, 0.3)' : 'rgba(188, 71, 103, 0.3)'
-                });
-
-            }
+            local.append(`exchange/history/volume/${symbol}/${exchange}`, {
+                time: time,
+                value: 'size' in volume ? volume.size : 0,
+                color: ('side' in volume ? volume.side : 'Sell') == 'Buy' ? 'rgba(121, 184, 61, 0.3)' : 'rgba(188, 71, 103, 0.3)'
+            });
 
         }
-
 
     }) ();
 
     // Get positions
     (async function () {
-
+        
+        /**
+         * Warning!
+         * BybBit accepts the list of positions not only by this method!
+         * Positions on ByBit exchange are updated in two methods!
+         * See the constructor of `exchange` class and CronTab task in main.
+         */
+        
         Promise.all([
             exchange.positions('bybit'),
-            exchange.positions('deribit')
+            exchange.positions('deribit'),
         ]).then(function ([bybit, deribit]) {
 
             var positions = {
@@ -588,12 +681,6 @@ wsse.register('disconnectIP', function (e) {
     }) ();
 
 }, null, true, 'America/Los_Angeles')).start();
-
-
-/**
- * Positions streamer
- */
-
 
 
 /**

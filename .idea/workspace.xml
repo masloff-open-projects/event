@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="e458b85e-ce44-4fe3-a13a-5740b4433596" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/indicators_bitmex_bittrex_delta.csv" beforeDir="false" afterPath="$PROJECT_DIR$/db/indicators_bitmex_bittrex_delta.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/indicators_bitmex_bybit_delta.csv" beforeDir="false" afterPath="$PROJECT_DIR$/db/indicators_bitmex_bybit_delta.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/indicators_bitmex_deribit_delta.csv" beforeDir="false" afterPath="$PROJECT_DIR$/db/indicators_bitmex_deribit_delta.csv" afterDir="false" />
@@ -15,15 +19,16 @@
       <change beforePath="$PROJECT_DIR$/db/indicators_deribit_bitmex_delta.csv" beforeDir="false" afterPath="$PROJECT_DIR$/db/indicators_deribit_bitmex_delta.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/indicators_deribit_bittrex_delta.csv" beforeDir="false" afterPath="$PROJECT_DIR$/db/indicators_deribit_bittrex_delta.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/indicators_deribit_bybit_delta.csv" beforeDir="false" afterPath="$PROJECT_DIR$/db/indicators_deribit_bybit_delta.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/compatibility.md" beforeDir="false" afterPath="$PROJECT_DIR$/doc/compatibility.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/positions.csv" beforeDir="false" afterPath="$PROJECT_DIR$/db/positions.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exchange.csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/html/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/html/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/VM.js" beforeDir="false" afterPath="$PROJECT_DIR$/lib/VM.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/data.js" beforeDir="false" afterPath="$PROJECT_DIR$/lib/data.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/events.js" beforeDir="false" afterPath="$PROJECT_DIR$/lib/events.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/exchange.js" beforeDir="false" afterPath="$PROJECT_DIR$/lib/exchange.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/indicators.js" beforeDir="false" afterPath="$PROJECT_DIR$/lib/indicators.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/css/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/user.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -59,12 +64,12 @@
     <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/public/complex/monaco" />
+    <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/public/img" />
       <recent name="$PROJECT_DIR$/public" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/public/complex/monaco" />
       <recent name="$PROJECT_DIR$/public/img" />
       <recent name="$PROJECT_DIR$/public" />
     </key>
@@ -93,7 +98,9 @@
       <workItem from="1596565083934" duration="779000" />
       <workItem from="1596566345182" duration="3489000" />
       <workItem from="1596619180803" duration="13809000" />
-      <workItem from="1596633409230" duration="26629000" />
+      <workItem from="1596633409230" duration="28185000" />
+      <workItem from="1596699413812" duration="775000" />
+      <workItem from="1596700256499" duration="14890000" />
     </task>
     <servers />
   </component>
@@ -113,26 +120,32 @@
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
     <state x="565" y="136" width="850" height="772" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1044@0.0.1920.1044" timestamp="1596652380842" />
-    <state x="664" y="130" width="592" height="783" key="find.popup" timestamp="1596542915431">
+    <state x="664" y="130" width="592" height="783" key="find.popup" timestamp="1596711259531">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="664" y="130" width="592" height="783" key="find.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596542915431" />
-    <state x="624" y="238" key="run.anything.popup" timestamp="1596656501832">
+    <state x="664" y="130" width="592" height="783" key="find.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596711259531" />
+    <state x="624" y="238" key="run.anything.popup" timestamp="1596709046740">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="624" y="238" key="run.anything.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596656501832" />
-    <state x="623" y="230" width="672" height="678" key="search.everywhere.popup" timestamp="1596548461203">
+    <state x="624" y="238" key="run.anything.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596709046740" />
+    <state x="623" y="230" width="672" height="678" key="search.everywhere.popup" timestamp="1596701263019">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="623" y="230" width="672" height="678" key="search.everywhere.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596548461203" />
+    <state x="623" y="230" width="672" height="678" key="search.everywhere.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1596701263019" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/main.js</url>
-          <line>72</line>
+          <line>71</line>
           <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/js/main.js</url>
+          <line>258</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="25" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
