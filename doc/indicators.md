@@ -92,5 +92,7 @@ Period Average is an indicator that shows the average price for a selected perio
 | period | text or int | Price change period in seconds. If you want use all period, type `all` |
 | offset | int | (optional) Offset in measurement |
 
+<img src='https://svgshare.com/i/NXq.svg' title='' width="100%"/>
+<img src='https://svgshare.com/i/NYi.svg' title='' width="100%"/>
 
 <!--- <img src='https://svgshare.com/i/NXQ.svg' title='' wdith="100%"/> -->
