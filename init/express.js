@@ -14,15 +14,10 @@ module.exports = function (app=null, twig=null, fs=null) {
                 href: '/',
             },
             {
-                id: 'accountsManager',
-                text: 'Accounts Manager',
-                href: '/manager/accounts',
-            },
-            {
-                id: 'positionsHistory',
-                text: 'Positions history',
-                href: '/history/positions',
-            },
+                id: 'deals',
+                text: 'Deals',
+                href: '/deals',
+            }
         ]
     };
 
@@ -37,6 +32,14 @@ module.exports = function (app=null, twig=null, fs=null) {
     app.get('/code', function (req, res) {
 
         twig.render('logic.html', twig_context).then((output) => {
+            res.end(output);
+        });
+
+    });
+
+    app.get('/deals', function (req, res) {
+
+        twig.render('deals.html', twig_context).then((output) => {
             res.end(output);
         });
 
@@ -63,7 +66,7 @@ module.exports = function (app=null, twig=null, fs=null) {
     })
 
     app.get('/file/:file', function (req, res) {
-        res.sendFile(__dirname + "/../db/" + req.params.file);
+        res.send(fs.readFileSync(__dirname + "/../db/" + req.params.file) );
     })
 
     app.post('/set/script/user', function (req, res) {
