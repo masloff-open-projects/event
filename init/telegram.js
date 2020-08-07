@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-module.exports = function (telegram=null) {
+module.exports = function (telegram=null, exchange=null) {
 
     telegram.register('/pnl', function () {
 

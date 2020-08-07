@@ -403,6 +403,6 @@ cron.register('* * * * * *', function () {
 });
 
 init_express (app, twing, fs);
-init_telegram (telegram);
+init_telegram (telegram, exchange);
 init_indicators (indicators, local, exchange);
 init_wsse (wsse, exchange, wss_tunnel, virtualEnv, indicators, local);

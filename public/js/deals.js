@@ -56,6 +56,8 @@ $(document).ready (function () {
 
         document.chartData = {};
         document.time = 0;
+        document.shorts = 0;
+        document.longs = 0;
         document.documentSplice = 1;
         document.documentLenght = 312;
 
@@ -83,10 +85,12 @@ $(document).ready (function () {
 
                     case "Buy":
                         formatValue = `<b class="int-up">${lineBody[value]}</b>`;
+                        document.longs = document.longs + 1;
                         break;
 
                     case "Sell":
                         formatValue = `<b class="int-down">${lineBody[value]}</b>`;
+                        document.shorts = document.shorts + 1;
                         break;
 
                     case "Deribit":
@@ -110,6 +114,15 @@ $(document).ready (function () {
                                 size = lineBody[value];
                                 formatValue = `<b class="${lineBody[value] > 0 ? 'int-up' : 'int-down'}">${lineBody[value]} (${lineBody[value] > 0 ? 'LONG' : 'SHORT'})</b>`;
                                 break;
+
+                            case "Side":
+                                if (lineBody[value] == 'Sell') {
+                                    document.shorts = document.shorts + 1;
+                                } else if (lineBody[value] == 'Buy') {
+                                    document.longs = document.longs + 1;
+                                }
+                                break;
+
 
                             default:
                                 formatValue = lineBody[value];
@@ -175,6 +188,12 @@ $(document).ready (function () {
                 lineType: 1,
             }).setData(document.chartData[exchange].reverse());
         }
+
+        // Render analytic
+        $("#analytic-shorts").text(document.shorts);
+        $("#analytic-longs").text(document.longs);
+        $("#analytic-dominates").text(`${document.longs > document.shorts ? 'LONG' : "SHORT"}`);
+        $("#analytic-dominates").addClass(`${document.longs > document.shorts ? 'int-up' : "int-down"}`);
 
     });
 
