@@ -51,11 +51,11 @@ const keypair = {
     }
 };
 
+const actions = new stream_actions ();
 const local = new stream_data ();
-const exchange = new stream_exchange (keypair.bybit, keypair.deribit, local);
+const exchange = new stream_exchange (keypair.bybit, keypair.deribit, local, actions);
 const wsse = new stream_wss_events ();
 const wss_tunnel = new stream_socket (wss, function (e, io) { return wsse.wss (e, wsse, io); })
-const actions = new stream_actions ();
 const csv = new stream_csv ();
 const cron = new stream_cron ();
 const indicators = new stream_indicators ();
@@ -83,7 +83,8 @@ const virtualEnv = new stream_vm ({
     exchange: exchange,
     telegram: telegram,
     indicators: indicators,
-    csv: csv
+    csv: csv,
+    actions: actions
 });
 
 virtualEnv.init();

@@ -13,6 +13,7 @@ To enjoy a virtual environment with comfort, you need to know what environmental
 | telegram.send | text | Sends a telegram message to all terminal users |
 | env | key | Get environmental value |
 | len | list | Get the length of the list |
+| on | `action` and `callback` | Registration Hot Interception  |
 | havePosition | `{exchange}.positions()` and `side` | If a position from the list of positions with the corresponding side is found, it will return the position object. If not, it will return False |
 | time | Don`t have params | Returns the current time stamp to UNIX |
 | [indicators](indicators.md).call | `indicatorName` and `params` | Get the calculations for the indicator |

@@ -43,7 +43,7 @@ module.exports = function (app=null, twig=null, fs=null) {
     });
 
     app.get('/get/script/user', function (req, res) {
-        res.sendFile(__dirname + "/scripts/user.js");
+        res.send(fs.readFileSync(__dirname + "/../scripts/user.js") );
     });
 
     app.get('/view/:file', function (req, res) {
@@ -63,12 +63,12 @@ module.exports = function (app=null, twig=null, fs=null) {
     })
 
     app.get('/file/:file', function (req, res) {
-        res.sendFile(__dirname + "/db/" + req.params.file);
+        res.sendFile(__dirname + "/../db/" + req.params.file);
     })
 
     app.post('/set/script/user', function (req, res) {
         if ('code' in req.body) {
-            fs.writeFileSync(__dirname + "/scripts/user.js", req.body.code);
+            fs.writeFileSync(__dirname + "/../scripts/user.js", req.body.code);
             res.sendStatus(200);
         }
     });

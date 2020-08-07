@@ -111,6 +111,7 @@ Further code will be completely clear to you - I have not used any new methods i
 2. [VM functions](doc/vm.md)
 3. [Exchanges compatibility](doc/compatibility.md)
 4. [Indicators](doc/indicators.md)
+5. [Actions](doc/actions.md)
 
 Authors: 
 <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>

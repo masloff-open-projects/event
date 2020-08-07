@@ -19,6 +19,8 @@ function everyPriceWait () {
     SimpleMASignal    : false
   });
 
+  // bybit.buy();
+
   // UI.log(MACD);
 
   // UI.log(percentDelta);
@@ -105,7 +107,10 @@ function init () {
   	_.update ('everyPriceScalping_exchangeObject', deribit);
     _.update ('everyPriceScalping_symbol', 'btc')
 	
- 
+  on ('exchangeUpdatePositions', function (e) {
+    UI.log(e);
+  });
+
   //deribit.editOrder('4291635323', 900, 13000, false, false, 'usd', 180000)
   
   // deribit.orders('BTC').then(function (e) {
@@ -127,6 +132,8 @@ function init () {
   // deribit.buy(13000, 200); 
 
   //deribit.buy(false, 1000); 
+  
+  //bybit.buy();
 
 }
 
