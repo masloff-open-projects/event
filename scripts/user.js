@@ -19,7 +19,7 @@ function everyPriceWait () {
     SimpleMASignal    : false
   });
 
-  UI.log(MACD);
+  // UI.log(MACD);
 
   // UI.log(percentDelta);
 

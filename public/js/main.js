@@ -1,54 +1,5 @@
 $(document).ready(function() {
 
-    $('#logic-modal').on('show.bs.modal', function (e) {
-        setTimeout(function(){
-            if (!('logic_editor' in window)) {
-
-                $.get("/get/script/user", function(data) {
-                    $("#logic_textarea").text(data);
-
-                    window.logic_editor = CodeMirror.fromTextArea(logic_textarea, {
-                        lineNumbers: true,
-                        styleActiveLine: true,
-                        matchBrackets: true,
-                        mode: "text/javascript",
-                        // keyMap: "sublime",
-                        theme: 'darcula',
-                        autoCloseTags: true,
-                        lineWrapping: true,
-                        extraKeys: {
-                            "Ctrl-R": function() {
-                                // do something
-                            },
-                            "Ctrl-S": function() {
-
-                                $.post("/set/script/user", {
-                                    code: window.logic_editor.getValue()
-                                }, function(data) {
-                                    alert('Saved!');
-                                });
-
-                            },
-                            "Ctrl": "autocomplete"
-                        }
-                    });
-                    window.logic_editor.on("keyup", function (cm, event) {
-                        if (event.keyCode != 13 && event.keyCode != 39 && event.keyCode != 37 && event.keyCode != 8 && !cm.state.completionActive) {
-                            clearTimeout(window.cm_autocomplite);
-                            window.cm_autocomplite = setTimeout(function () {
-                                CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
-                            }, 1550);
-
-                        } else if (event.keyCode == 13 || event.keyCode == 8) {
-                            clearTimeout(window.cm_autocomplite);
-                        }
-                    });
-                });
-
-            }
-        }, 300);
-    });
-
     $('#logic-editor').click(function () { window.open("/code", "", "width=1200,height=800"); });
 
     $(`[data-action="changeLineShow"]`).change(function(e) {
@@ -69,7 +20,7 @@ $(document).ready(function() {
     }
 
     window.chart_object = LightweightCharts.createChart(exchange_chart, {
-        height: $(document).height() / 1.5,
+        height: $(document).height() * 0.54,
         rightPriceScale: {
             scaleMargins: {
                 top: 0.3,
@@ -184,13 +135,62 @@ $(document).ready(function() {
         }
     });
 
-    $( function() {
-        $( ".canResize" ).resizable();
-    } );
+    let timeout = 3000;
+    let lastActiveTimestamp = 0;
+    let userIsActive = false;
+
+    window.addEventListener('blur', function() {
+
+        wss_stream.send('changeIpState', {
+            ip: 'socket' in document ? document.socket.ip : 'unknown',
+            state: 'leave'
+        });
+
+    }, false);
+    window.addEventListener('focus', function() {
+
+        wss_stream.send('changeIpState', {
+            ip: 'socket' in document ? document.socket.ip : 'unknown',
+            state: 'online'
+        });
+
+    }, false);
+    window.addEventListener('mousemove', active);
+    window.addEventListener('keypress', active);
+    window.addEventListener('click', active);
+
+    setInterval(checkUserIsActive, 1000)
+    active();
+
+    function checkUserIsActive() {
+        if (userIsActive && new Date().getTime() - lastActiveTimestamp > timeout){
+            userIsActive = false;
+
+            wss_stream.send('changeIpState', {
+                ip: 'socket' in document ? document.socket.ip : 'unknown',
+                state: 'online'
+            });
+
+        }
+    }
+
+    function active() {
+        lastActiveTimestamp = new Date().getTime();
+        if (!userIsActive) {
+            userIsActive = true;
+
+            wss_stream.send('changeIpState', {
+                ip: 'socket' in document ? document.socket.ip : 'unknown',
+                state: 'active'
+            });
+
+        }
+    }
 
 });
 
 $(document).resize(function() {
+
     if ('chart_object' in window) {
 
         const chart_height = $(document).height() / 1.5;
@@ -199,10 +199,12 @@ $(document).resize(function() {
         window.chart_object.applyOptions({ width: chart_width, height: chart_height })
 
     }
+
 });
 
 wss_stream.on ('actions', function (e=null) {
     return {
+        'whoIsMe': {},
         'balance': {},
         'indicators': [
             {
@@ -236,6 +238,7 @@ wss_stream.on ('actions', function (e=null) {
 });
 
 wss_stream.on ('open', function (e=null) {
+
     for (const action in wss_stream.call('actions')) {
         let data = wss_stream.call('actions')[action];
         wss_stream.send(action, data);
@@ -256,6 +259,12 @@ wss_stream.on ('close', function (e=null) {
 
 $(document).ready(function (e) {
 
+    wss_stream.register('whoIsMe', function (e=null) {
+        if (typeof e == typeof []) {
+            document.socket = e[0];
+        }
+    });
+
     wss_stream.register('volumeHistory', function (e=null) {
         if (typeof e == typeof []) {
             let volumes = e[0];
@@ -269,7 +278,30 @@ $(document).ready(function (e) {
         if (typeof e[0] == typeof []) {
             $("#users-list").text('');
             for (const device of e[0]) {
-                $("#users-list").append(`<div class="user user-connection-controller" data-ip="${device.ip}"> <i class="fa fa-circle user-online-indicator" aria-hidden="true"></i> <b>${'Anonim'}</b>: ${device.ip}</div>`);
+
+                var stateColor = "";
+
+                switch (device.state) {
+
+                    case 'ready':
+                        stateColor = '#ec9811';
+                        break;
+
+                    case 'online':
+                        stateColor = '#79b83d';
+                        break;
+
+                    case 'leave':
+                        stateColor = '#f14f4c';
+                        break;
+
+                    case 'active':
+                        stateColor = '#297CB3';
+                        break;
+
+                }
+
+                $("#users-list").append(`<div class="user user-connection-controller" data-ip="${device.ip}"> <i class="fa fa-circle user-online-indicator" aria-hidden="true" style="color: ${stateColor};"></i> <b>${(('socket' in document ? document.socket.ip : 'unknown') == device.ip ? "Your PC" : device.alias)}</b>: ${device.ip}</div>`);
             }
         }
 

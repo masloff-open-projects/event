@@ -24,10 +24,13 @@ class wstream {
     }
 
     send (action="default", data={}) {
-        this.wss.send(JSON.stringify({
-            action: action,
-            data: data
-        }));
+        if(this.wss.readyState === this.wss.OPEN) {
+            this.wss.send(JSON.stringify({
+                action: action,
+                data: data
+            }));
+        }
+
     }
 
     on (on="default", callback={}) {

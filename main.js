@@ -14,6 +14,12 @@ const stream_data = require('./lib/data.js');
 const stream_indicators = require('./lib/indicators.js');
 const stream_csv = require('./lib/csv.js');
 const stream_vm = require('./lib/VM.js');
+const stream_cron = require('./lib/cron.js');
+
+const init_express = require('./init/express.js');
+const init_telegram = require('./init/telegram.js');
+const init_wsse = require('./init/wsse.js');
+const init_indicators = require('./init/indicators.js');
 
 const fs = require ('fs');
 const dotenv = require('dotenv');
@@ -27,7 +33,7 @@ const BitMEXClient = require('bitmex-realtime-api');
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({httpServer: server});
-const cron = require('cron').CronJob;
+const {TwingEnvironment, TwingLoaderFilesystem} = require('twing');
 
 dotenv.config();
 server.listen(process.env.PORT, process.env.IP,function() { });
@@ -48,9 +54,10 @@ const keypair = {
 const local = new stream_data ();
 const exchange = new stream_exchange (keypair.bybit, keypair.deribit, local);
 const wsse = new stream_wss_events ();
-const wss_tunnel = new stream_socket (wss, function (e) { return wsse.wss (e, wsse); })
+const wss_tunnel = new stream_socket (wss, function (e, io) { return wsse.wss (e, wsse, io); })
 const actions = new stream_actions ();
 const csv = new stream_csv ();
+const cron = new stream_cron ();
 const indicators = new stream_indicators ();
 const telegram = new stream_telegram (process.env.TELEGRAM_TOKEN, [
     {
@@ -63,6 +70,9 @@ const telegram = new stream_telegram (process.env.TELEGRAM_TOKEN, [
     }
 ]);
 const bmc = new BitMEXClient({testnet: !process.env.TESTNET});
+
+const loader = new TwingLoaderFilesystem('./html');
+const twing = new TwingEnvironment(loader);
 
 app.use(basicAuth({users: {'trader': 'QmHLY3IlrEkRgR82', 'root': 'root'}, challenge: true, realm: 'Imb4T3st4pp'}));
 app.use(bodyParser.urlencoded({extended: true}));
@@ -79,8 +89,6 @@ const virtualEnv = new stream_vm ({
 virtualEnv.init();
 
 const e = new stream_events (virtualEnv, local);
-
-virtualEnv.execute('everyPrice');
 
 (function (e=null) {
 
@@ -256,299 +264,16 @@ virtualEnv.execute('everyPrice');
 
 }) (e);
 
-indicators.register('delta', function (instance=null, e=null) {
+cron.register('* * * * * *', function () {
 
-    if ((typeof e == typeof {}) && ('symbol' in e && 'e1' in e && 'e2' in e)) {
-
-        const price1 = local.get(`exchange/real/price/${e.symbol}/${e.e1}`);
-        const price2 = local.get(`exchange/real/price/${e.symbol}/${e.e2}`);
-
-        return parseFloat(price1) - parseFloat(price2)
-
-    } else {
-
-        var returnData = {};
-        const priceData = local.list('exchange/real/price/', false);
-
-        for (const _ in priceData) {
-
-            const price = priceData[_];
-            const symbol = _.toLowerCase().split('/')[0];
-            const exchange = _.toLowerCase().split('/')[1];
-
-            for (const __ in priceData) {
-
-                const price__ = priceData[__];
-                const symbol__ = __.toLowerCase().split('/')[0];
-                const exchange__ = __.toLowerCase().split('/')[1];
-
-                if (exchange != exchange__) {
-
-                    (exchange in returnData ? null : returnData[exchange] = {});
-                    returnData[exchange][exchange__] = price - price__;
-
-                }
-
-            }
-
-        }
-
-        return returnData;
-
-    }
+    // Reauth on Deribit
+    (async function () {
+        exchange.auth('deribit');
+    }) ();
 
 });
 
-indicators.register('percent', function (instance=null, e=null) {
-
-    if ((typeof e == typeof {}) && ('symbol' in e && 'e1' in e && 'e2' in e)) {
-
-        const price1 = local.get(`exchange/real/price/${e.symbol}/${e.e1}`);
-        const price2 = local.get(`exchange/real/price/${e.symbol}/${e.e2}`);
-
-        return (parseInt(price1) - parseInt(price2)/parseInt(price1)) * 100;
-
-    } else {
-
-        var returnData = {};
-        const priceData = local.list('exchange/real/price/', false);
-
-        for (const _ in priceData) {
-
-            const price = priceData[_];
-            const symbol = _.toLowerCase().split('/')[0];
-            const exchange = _.toLowerCase().split('/')[1];
-
-            for (const __ in priceData) {
-
-                const price__ = priceData[__];
-                const symbol__ = __.toLowerCase().split('/')[0];
-                const exchange__ = __.toLowerCase().split('/')[1];
-
-                if (exchange != exchange__) {
-
-                    (exchange in returnData ? null : returnData[exchange] = {});
-                    returnData[exchange][exchange__] = (parseInt(price) - parseInt(price__)/parseInt(price)) * 100;
-
-                }
-
-            }
-
-        }
-
-        return returnData;
-
-    }
-
-});
-
-indicators.register('period_average', function (instance=null, e=null) {
-
-
-    if ((typeof e == typeof {}) && ('symbol' in e && 'e' in e && 'period' in e)) {
-
-        const history = local.get(`exchange/clearHistory/price/${e.symbol}/${e.e}`);
-
-        if (typeof history == typeof []) {
-            const period = history.reverse().slice(('offset' in e ? e.offset : 0), e.period == 'all' ? history.length : e.period);
-            var SumAll = 0;
-            for(i = 0; i < period.length; i++){ SumAll += period[i]; }
-            return (SumAll/period.length)
-        }
-
-        throw 'Not all the parameters are correct';
-
-    } else {
-        throw 'Function waits for parameters';
-    }
-
-});
-
-indicators.register('SMA', function (instance=null, e=null) {
-
-    if ((typeof e == typeof {}) && ('symbol' in e && 'e' in e && 'period' in e && 'slice' in e)) {
-
-        const history = local.get(`exchange/clearHistory/price/${e.symbol}/${e.e}`);
-        const values = history.reverse().slice(('offset' in e ? e.offset : 0), e.slice == 'all' ? history.length : e.slice);
-
-        return instance.SMA.calculate({period: e.period, values: values.reverse()});
-
-        throw 'Not all the parameters are correct';
-
-    } else {
-        throw 'Function waits for parameters';
-    }
-
-});
-
-indicators.register('MACD', function (instance=null, e=null) {
-
-
-    if ((typeof e == typeof {}) && ('values' in e && 'fastPeriod' in e && 'slowPeriod' in e && 'signalPeriod' in e && 'SimpleMAOscillator' in e && 'SimpleMASignal' in e)) {
-
-        return instance.MACD.calculate({
-            values: e.values,
-            fastPeriod: e.fastPeriod,
-            slowPeriod: e.slowPeriod,
-            signalPeriod: e.signalPeriod ,
-            SimpleMAOscillator: e.SimpleMAOscillator,
-            SimpleMASignal: e.SimpleMASignal
-        });
-
-        throw 'Not all the parameters are correct';
-
-    } else {
-        throw 'Function waits for parameters';
-    }
-
-});
-
-wsse.register('balance', function (e) {
-    return Promise.all([
-        exchange.balance('bybit'),
-        exchange.balance('deribit')
-    ]);
-});
-
-wsse.register('connections', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-
-            var device = [];
-
-            for (const connection of wss_tunnel.connections()) {
-                device.push({
-                    ip: connection.remoteAddress
-                });
-            }
-
-            resolve(device);
-        })
-    ]);
-});
-
-wsse.register('console', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-            resolve({
-                UI: virtualEnv.currentContext().UI
-            });
-        })
-    ]);
-});
-
-wsse.register('indicators', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-
-            var returnData = {};
-
-            if ('data' in e && e.data) {
-                for (const indicator of e.data) {
-                    returnData[indicator.name] = indicators.call(indicator.name, {});
-                }
-            }
-
-            resolve(returnData);
-        })
-    ]);
-});
-
-wsse.register('positions', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-
-            var response = [];
-
-            for (const position of (local.get('positions/deribit') ? local.get('positions/deribit') : [{}])) {response.push(position)}
-            for (const position of (local.get('positions/bybit') ? local.get('positions/bybit') : [{}])) {response.push(position)}
-
-            resolve(response);
-        })
-    ]);
-});
-
-wsse.register('liquidations', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-            resolve(local.list('exchange/liquidation/real/', false));
-        })
-    ]);
-});
-
-wsse.register('ordersBook', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-            resolve(local.get(`exchange/book/real/${e.data.symbol}/${e.data.exchange}`))
-        })
-    ]);
-});
-
-wsse.register('priceHistory', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-
-            if ('data' in e && e.data) {
-
-                var returnData = {};
-                const historyData = local.list('exchange/history/price/', false);
-
-                for (const _ in historyData) {
-
-                    const history = historyData[_];
-                    const symbol = _.toLowerCase().split('/')[0];
-                    const exchange = _.toLowerCase().split('/')[1];
-
-                    if (symbol === e.data.symbol && (exchange in e.data.exchanges && (e.data.exchanges[exchange] !== 'false' && e.data.exchanges[exchange] !== false)) ) {
-
-                        const priceData = local.list(`exchange/real/price/${symbol}/`, false);
-
-                        (exchange in returnData ? null : returnData[exchange] = {history: {}, price: {}});
-
-                        returnData[exchange]['history'] = history;
-                        returnData[exchange]['price'] = priceData[exchange];
-
-                    }
-
-                }
-
-                resolve(returnData);
-
-            } else {
-
-                resolve(local.list('exchange/history/price/', false));
-
-            }
-        })
-    ]);
-});
-
-wsse.register('volumeHistory', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-            resolve(local.get(`exchange/history/volume/${e.data.symbol}/${e.data.exchange}`))
-        })
-    ]);
-});
-
-wsse.register('openMarketPosition', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-            let data = e.data;
-            resolve(exchange.market(data.exchange, data.side, data.symbol, data.size))
-        })
-    ]);
-});
-
-wsse.register('disconnectIP', function (e) {
-    return Promise.all([
-        new Promise((resolve, reject) => {
-            resolve(wss_tunnel.disconnect(e.data.ip))
-        })
-    ]);
-});
-
-(new cron('* * * * * *', function() {
+cron.register('* * * * * *', function () {
 
     // Record price
     (async function (e=null) {
@@ -601,14 +326,14 @@ wsse.register('disconnectIP', function (e) {
 
     // Get positions
     (async function () {
-        
+
         /**
          * Warning!
          * BybBit accepts the list of positions not only by this method!
          * Positions on ByBit exchange are updated in two methods!
          * See the constructor of `exchange` class and CronTab task in main.
          */
-        
+
         Promise.all([
             exchange.positions('bybit'),
             exchange.positions('deribit'),
@@ -674,52 +399,9 @@ wsse.register('disconnectIP', function (e) {
 
     }) ();
 
-}, null, true, 'America/Los_Angeles')).start();
-
-(new cron('*/10 * * * *', function() {
-
-    // Reauth on Deribit
-    (async function () {
-        exchange.auth('deribit');
-    }) ();
-
-}, null, true, 'America/Los_Angeles')).start();
-
-
-/**
- * Register telegram events
- */
-
-telegram.register('/pnl', function () {
-
 });
 
-telegram.on('polling_error', function () {});
-telegram.on('webhook_error', function () {});
-
-app.get('/', function (req, res) {
-    res.sendFile(__dirname + "/html/index.html");
-});
-
-app.get('/code', function (req, res) {
-    res.sendFile(__dirname + "/html/logic.html");
-});
-
-app.get('/get/script/user', function (req, res) {
-    res.sendFile(__dirname + "/scripts/user.js");
-});
-
-app.get('/view/:file', function (req, res) {
-    res.sendFile(__dirname + "/html/csv.html");
-})
-
-app.get('/file/:file', function (req, res) {
-    res.sendFile(__dirname + "/db/" + req.params.file);
-})
-
-app.post('/set/script/user', function (req, res) {
-    if ('code' in req.body) {
-        fs.writeFileSync(__dirname + "/scripts/user.js", req.body.code);
-        res.sendStatus(200);
-    }
-});
+init_express (app, twing, fs);
+init_telegram (telegram);
+init_indicators (indicators, local, exchange);
+init_wsse (wsse, exchange, wss_tunnel, virtualEnv, indicators, local);

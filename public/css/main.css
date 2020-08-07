@@ -24,6 +24,59 @@ select {
     border: 1px solid #525252;
 }
 
+input {
+    color: white;
+    background: #232222;
+    padding: 6px 8px;
+    font-size: 14px;
+    border: 1px solid #525252;
+    width: 100%;
+    margin: 8px;
+}
+
+.offer {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    place-items: center;
+    flex-flow: column;
+}
+
+.titleBox {
+    margin-bottom: 42px;
+    text-align: center;
+}
+
+.formBox {
+    text-align: center;
+}
+
+.title {
+    font-weight: 900;
+    font-size: 62px;
+    font-family: 'Roboto';
+}
+
+.description {
+    font-size: 12px;
+    font-weight: 400;
+    font-family: Roboto;
+}
+
+.submit:hover {
+     text-decoration: underline;
+}
+
+.submit {
+    background: transparent;
+    border: transparent;
+    margin: 24px;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: Roboto;
+}
+
 div.ui-preloader > h4 {
     font-width: bold;
     font-size: 26px;
@@ -87,7 +140,7 @@ div.positions > div.table-content {
 }
 
 div.positions {
-    margin-top: 32px;
+    
     max-height: 240px;
     overflow-y: auto;
 }
@@ -107,6 +160,7 @@ div.logic-error {
 }
 
 div.cart {
+    margin: 32px 0px;
     background: #232323;
     border: 1px solid #3e3e3e;
     padding: 12px;
@@ -130,17 +184,17 @@ div.cart > div.top{
 }
 
 div.cart + .balance {
-    margin-top: 32px;
+    
 }
 
 div.cart + .conditions {
-    margin-top: 32px;
+    
     max-height: 240px;
     overflow-y: auto;
 }
 
 div.cart + .liquidation {
-    margin-top: 32px;
+    
     max-height: 240px;
     overflow-y: auto;
 }
@@ -152,7 +206,7 @@ div.cart + .liquidation  > h6 {
 }
 
 div.cart + .orders {
-    margin-top: 32px;
+    
     max-height: 640px;
     overflow-y: auto;
 }
@@ -279,7 +333,7 @@ div.cart + .liquidation > #liquidation-list > div.sell {
 }
 
 div.cart + .users {
-    margin-top: 32px;
+    
     max-height: 240px;
     overflow-y: auto;
 }
@@ -294,7 +348,7 @@ div.chart-cart {
 }
 
 section.box {
-    margin: 32px 0px;
+    margin: 0px 0px;
     overflow: hidden;
 }
 
@@ -302,6 +356,29 @@ div.cart + .conditions  > h6 {
     padding: 4px 8px;
     margin: 4px 0px;
     font-width: bold;
+}
+
+div.cart + .chat  > h6 {
+    padding: 4px 8px;
+    margin: 4px 0px;
+    font-width: bold;
+}
+
+div.cart + .chat  > #chatInput {
+    margin: 4px 8px;
+    margin-top: 24px;
+    width: 96%;
+}
+
+div.cart + .chat  > #users-list > .user {
+    padding: 4px 8px;
+    margin: 4px 0px;
+}
+
+div.cart + .chat  > #users-list > .user > svg.user-online-indicator {
+    font-size: 8px;
+    color: #79b83d;
+    margin-right: 6px;
 }
 
 div.cart + .users  > h6 {

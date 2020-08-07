@@ -7,18 +7,20 @@ if (wss_stream) {
 
 io.onerror = function (event) {
     wss_stream.call('error', {
-        isOpen: io.readyState !== io.OPEN
+        isOpen: io.readyState !== io.OPEN,
+        event: event
     });
 }
 
 io.onclose = function (event) {
     wss_stream.call('close', {
-        isOpen: io.readyState !== io.OPEN
+        isOpen: io.readyState !== io.OPEN,
+        event: event
     });
 }
 
 io.onopen = function (event) {
-    wss_stream.call('open', {});
+    wss_stream.call('open', event);
 }
 
 io.onmessage = function (event) {
