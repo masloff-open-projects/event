@@ -21,6 +21,8 @@ The firmware sucks from the functions that the terminal calls during certain act
 | init    | Don`t have params | Called at the start of the terminal  |
 | everyPrice    | Don`t have params | Called up every time the price is updated  |
 | everyPriceWait    | Don`t have params | Called up at each price update, but ignores subsequent requests for some time  |
+| everySecond    | Don`t have params | Regardless of the circumstances, every second is triggered.  |
+| sometimes    | Don`t have params | Called every 15 minutes.  |
 | [everyPriceScalping](scalping.md)    | `Delta`, `Local trand`, `The average delta for the period` and `Average delta trand` and  | It is called every time the price changes and passes the data to the function for analysis. |
 
 In addition to the functions, you also have access to the environment methods, which you can call yourself

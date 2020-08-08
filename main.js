@@ -265,11 +265,16 @@ const e = new stream_events (virtualEnv, local);
 
 }) (e);
 
-cron.register('* * * * * *', function () {
+cron.register('0 */10 * * * *', function () {
 
     // Reauth on Deribit
     (async function () {
         exchange.auth('deribit');
+    }) ();
+
+    // VM function
+    (async function () {
+        virtualEnv.execute('sometimes');
     }) ();
 
 });
@@ -301,6 +306,11 @@ cron.register('* * * * * *', function () {
     // Record deltas
     (async function () {
 
+    }) ();
+
+    // VM function
+    (async function () {
+        virtualEnv.execute('everySecond');
     }) ();
 
     // Record volume history

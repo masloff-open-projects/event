@@ -35,12 +35,12 @@ class __ {
 
 const _ = new __ ();
 
-try {
+if (typeof init === "function") {
 
-    if (typeof init === "function") {
+    try {
         init ();
+    } catch (e) {
+        UI.err(e.message);
     }
 
-} catch (e) {
-    UI.err(e.message);
 }
